@@ -4,19 +4,23 @@ services:
       context: ./_docker/php-apache
       dockerfile: Dockerfile
       args:
-        WKHTMLTOPDF: "false"
-    container_name: php-apache
+        INSTALL_WKHTMLTOPDF: ${INSTALL_WKHTMLTOPDF}
+    container_name: php-apache-${COMPOSE_PROJECT_NAME}
     environment:
       PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
     volumes:
       - ./:/var/www/html
       - ./_docker/php-apache/additional-inis:/usr/local/etc/php/conf.d/additional-inis
+    ports:
+      - ${APACHE_PORT}:80
 
   mariadb:
     image: mariadb:10.5
-    container_name: mariadb
+    container_name: mariadb-${COMPOSE_PROJECT_NAME}
     environment:
-      MYSQL_ROOT_PASSWORD: ""
-      MYSQL_DATABASE: ""
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
       - ./_docker/mariadb:/docker-entrypoint-initdb.d
+    ports:
+      - ${MARIADB_PORT}:3306

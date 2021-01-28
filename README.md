@@ -1,17 +1,16 @@
 # Docker Setup
 
-## <a id="notes"></a> Notes:
+## Notes:
 ### Note 1:
 If you make any changes to one of following files:
-- `./docker-compose.yml`
-- `./docker-compose.override.yml`
+- `docker-compose.yml`
 
 make sure to tear down the related docker containers like so:
 ```shell
 docker-compose down -v
 ```
 
-### <a id="note2"></a> Note 2:
+### Note 2:
 If you make any changes to one of the following files:
 - any `Dockerfile`
 
@@ -25,16 +24,32 @@ After that you can start it again with:
 docker-compose up
 ```
 
-## Configuration:
-### 1. Create `docker-compose.override.yml`
-- copy `docker-compose.override.sample.yml` to `docker-compose.override.yml`
 
-### 2. Database setup
-- In the `docker-compose.override.yml` set the following evironment parameters:
-    - `MYSQL_ROOT_PASSWORD`
-    - `MYSQL_DATABASE`
+## Configuration:
+### 1. Create `.env` file
+- copy `.env.sample` to `.env`
+
+
+### 2. Set your project name
+- Set your project name in the `.env` file like so:
+```dotenv
+COMPOSE_PROJECT_NAME=my-project
+```
+- This prevents container name collisions in the future.
+
+
+### 3. Database
+#### Config:
+- Set your password and your database name in the `.env` file like so:
+```dotenv
+MYSQL_ROOT_PASSWORD=password
+MYSQL_DATABASE=database_name
+```
+#### Import at initial startup:
 - To import a database at **initial** docker startup move a `.sql` file to `./_docker/mariadb/`
-    - This will execute the `.sql` file into the database you specified with `MYSQL_DATABASE` on **initial(!)** docker startup
+- This will only be executed at first container startup. 
+  - Tear down the containers to start fresh and import your `.sql` file (see Note 1 above)
+
 
 ### 3. PHP setup
 - To specify the **PHP version** change the `FROM` command in `./_docker/php-apache/Dockerfile`
@@ -42,7 +57,7 @@ docker-compose up
 ```dockerfile
 FROM php:5.6-apache
 ```
-- After that make sure to build this container again (see [Note 2 above](#note2))
+- After that make sure to build this container again (see Note 2 above)
 #### PHP Extensions:
 - To install and enable **PHP extensions** add them to `./_docker/php-apache/Dockerfile`.
     - e.g. add and enable the PHP `mysql` extension like so:
@@ -61,39 +76,53 @@ xdebug.remote_enable=1
 #### Config
 - To edit any `php.ini` config, just add another `.ini` file to `_docker/php-apache/additional-inis/`
 
-### 3. Connect to database
-- To connect your **application** to the database use the following credentials:
-  - host: name of the MySQL docker container (`mariadb`)
-  - user: `root`
-  - password: specified with `MYSQL_ROOT_PASSWORD` in `docker-compose.override.yml`
-- You can connect to the database from any client outside of docker (for example [DBeaver](https://dbeaver.io/)) on: 
-  - host: `localhost` 
-  - port: can be configured in `docker-compose.override.sample.yml` (default `3307`)
 
-### 4. Open Application
-- To open the application frontend at root (`./`) open `localhost:<configured_port` in your browser. 
-  - You can configure the port in `docker-compose.override.yml` (default `8080`) 
-
-### 5. install wkhtmltopdf
-- If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency in the php-apache container add the following to your `docker-compose.override.yml`:
-```yaml
-services:
-  #...
-  php-apache:
-    build:
-      args:
-        WKHTMLTOPDF: "true"
+### 4. install wkhtmltopdf
+- If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency in the php-apache container add the following to your `.env` file:
+```dotenv
+INSTALL_WKHTMLTOPDF=true
 ```
-- After that you have to **rebuild the container** (see [Note 2](#note2))
+- After that you have to **rebuild the container** (see Note 2 above)
 - Then the binary from wkhtmltopdf is available in the container under `/usr/local/bin/wkhtmltopdf`, so set this path in your application settings
 
-## Troubleshoot
 
+### 5. Start your containers
+- After configuration you can start your containers with:
+```shell
+docker-compose up
+```
+
+
+### 6. Connect to database
+- To connect your **application** to the database use the following credentials:
+  - host: name of MySQL docker container `mariadb-<COMPOSE_PROJECT_NAME>`
+    - `COMPOSE_PROJECT_NAME` defined in `.env` file
+  - user: `root`
+  - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
+- You can connect to the database from any client outside of docker (for example [DBeaver](https://dbeaver.io/)) on: 
+  - host: `localhost` 
+  - port: can be configured in `.env` file like so (default `3307`):
+```dotenv
+MARIADB_PORT=3307
+```
+
+
+### 7. Open Application
+- To open the application frontend at root (`./`) open `localhost:<port>` in your browser. 
+  - You can configure the port in `.env` file like so (default `8080`):
+```dotenv
+APACHE_PORT=8080
+```
+
+
+## Troubleshoot
+#### bash into container:
 - To troubleshoot anything inside a container, go into the container with:
 ```shell
 docker exec -it <container-name> /bin/bash
 ```
-- For other problems read the [Notes](#notes) above
 
 ## Roadmap
 * [ ] initial composer install execution within docker container
+* [ ] use of docker alpine packages to create smaller container
+* [ ] set webroot of web application

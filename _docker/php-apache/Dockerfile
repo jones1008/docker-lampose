@@ -1,10 +1,6 @@
 FROM php:7.4-apache
 
-#ADD ./_docker/php-apache/xdebug.ini /usr/local/etc/php/conf.d
-
-### add PHP extensions here:
-RUN docker-php-ext-install mysql && \
-    docker-php-ext-enable mysql
+### add PHP extensions here as explained in README.md:
 
 
 # install correct xdebug version with script
@@ -14,8 +10,8 @@ RUN /install-xdebug.sh && \
 
 
 # install wkhtmltopdf and it's dependencies
-ARG WKHTMLTOPDF="false"
-RUN if [ "$WKHTMLTOPDF" = "true" ]; then \
+ARG INSTALL_WKHTMLTOPDF="false"
+RUN if [ "$INSTALL_WKHTMLTOPDF" = "true" ]; then \
         apt-get update && \
         apt-get install -y \
             curl \
