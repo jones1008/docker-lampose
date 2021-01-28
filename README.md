@@ -52,7 +52,7 @@ MYSQL_DATABASE=database_name
 #### Import at initial startup:
 - To import a database at **initial** docker startup move a `.sql` file to `./_docker/mariadb/`
 - This will only be executed at first container startup. 
-  - Tear down the containers to start fresh and import your `.sql` file (see Note 1 above)
+    - Tear down the containers to start fresh and import your `.sql` file (see Note 1 above)
 
 
 ### 3. PHP setup
@@ -114,13 +114,14 @@ docker-compose up
 
 ### 8. Connect to database
 - To connect your **application** to the database use the following credentials:
-  - host: name of MySQL docker container `mariadb-<COMPOSE_PROJECT_NAME>`
-    - `COMPOSE_PROJECT_NAME` defined in `.env` file
-  - user: `root`
-  - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
+    - host: name of MySQL docker container `mariadb-<COMPOSE_PROJECT_NAME>`
+        - `COMPOSE_PROJECT_NAME` defined in `.env` file
+    - user: `root`
+    - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
 - You can connect to the database from any client outside of docker (for example [DBeaver](https://dbeaver.io/)) on: 
-  - host: `localhost` 
-  - port: can be configured in `.env` file (default `3307`).  Make sure to restart the containers after changing it.
+    - host: `localhost` 
+    - port: can be configured in `.env` file (default `3307`).  Make sure to restart the containers after changing it.
+  
 ```dotenv
 MARIADB_PORT=3307
 ```
@@ -128,7 +129,7 @@ MARIADB_PORT=3307
 
 ### 9. Open Application
 - To open the application frontend at root (`./`) open `localhost:<port>` in your browser. 
-  - You can configure the port in `.env` file (default `8080`). Make sure to restart the containers after changing it.
+    - You can configure the port in `.env` file (default `8080`). Make sure to restart the containers after changing it.
 ```dotenv
 APACHE_PORT=8080
 ```
