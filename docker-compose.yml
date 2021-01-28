@@ -1,16 +1,17 @@
 services:
-  php-apache:
+  apache-php:
     build:
-      context: ./_docker/php-apache
+      context: _docker/apache-php
       dockerfile: Dockerfile
       args:
         INSTALL_WKHTMLTOPDF: ${INSTALL_WKHTMLTOPDF}
-    container_name: php-apache-${COMPOSE_PROJECT_NAME}
+    container_name: apache-php-${COMPOSE_PROJECT_NAME}
     environment:
       PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
     volumes:
       - ./:/var/www/html
-      - ./_docker/php-apache/additional-inis:/usr/local/etc/php/conf.d/additional-inis
+      - ./_docker/apache-php/additional-inis:/usr/local/etc/php/conf.d/additional-inis
+      - ./_docker/apache-php/sites-available:/etc/apache2/sites-available
     ports:
       - ${APACHE_PORT}:80
 

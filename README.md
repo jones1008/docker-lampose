@@ -52,33 +52,40 @@ MYSQL_DATABASE=database_name
 
 
 ### 3. PHP setup
-- To specify the **PHP version** change the `FROM` command in `./_docker/php-apache/Dockerfile`
+- To specify the **PHP version** change the `FROM` command in `./_docker/apache-php/Dockerfile`
     - e.g. for PHP version 5.6:
 ```dockerfile
 FROM php:5.6-apache
 ```
 - After that make sure to build this container again (see Note 2 above)
 #### PHP Extensions:
-- To install and enable **PHP extensions** add them to `./_docker/php-apache/Dockerfile`.
+- To install and enable **PHP extensions** add them to `./_docker/apache-php/Dockerfile`.
     - e.g. add and enable the PHP `mysql` extension like so:
 ```dockerfile
 RUN docker-php-ext-install mysql && \
     docker-php-ext-enable mysql
 ```
 #### xdebug:
-- To enable xdebug set `xdebug.remote_enable` in `./_docker/php-apache/additional-inis/xdebug.ini` like so:
+- To enable xdebug set `xdebug.remote_enable` in `./_docker/apache-php/additional-inis/xdebug.ini` like so:
 ```
 xdebug.remote_enable=1
 ```
 - To edit any other xdebug configuration parameter add them within this `.ini` file
-- The correct xdebug version should be installed with the `_docker/php-apache/install-xdebug.sh` script with the first docker build.
+- The correct xdebug version should be installed with the `_docker/apache-php/install-xdebug.sh` script with the first docker build.
   
 #### Config
-- To edit any `php.ini` config, just add another `.ini` file to `_docker/php-apache/additional-inis/`
+- To edit any `php.ini` config, just add another `.ini` file to `_docker/apache-php/additional-inis/`
 
+### 4. Webserver Setup
+- If you need to set the root directory of your web application other than `./` set it in `_docker/apache-php/sites-available/000-default.conf` like so:
+```apacheconf
+# ...
+DocumentRoot /var/www/html/some-sub-directory
+```
+- After that a **restart of docker-compose** is required.
 
-### 4. install wkhtmltopdf
-- If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency in the php-apache container add the following to your `.env` file:
+### 5. install wkhtmltopdf
+- If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency in the apache-php container add the following to your `.env` file:
 ```dotenv
 INSTALL_WKHTMLTOPDF=true
 ```
@@ -86,14 +93,14 @@ INSTALL_WKHTMLTOPDF=true
 - Then the binary from wkhtmltopdf is available in the container under `/usr/local/bin/wkhtmltopdf`, so set this path in your application settings
 
 
-### 5. Start your containers
+### 6. Start your containers
 - After configuration you can start your containers with:
 ```shell
 docker-compose up
 ```
 
 
-### 6. Connect to database
+### 7. Connect to database
 - To connect your **application** to the database use the following credentials:
   - host: name of MySQL docker container `mariadb-<COMPOSE_PROJECT_NAME>`
     - `COMPOSE_PROJECT_NAME` defined in `.env` file
@@ -107,7 +114,7 @@ MARIADB_PORT=3307
 ```
 
 
-### 7. Open Application
+### 8. Open Application
 - To open the application frontend at root (`./`) open `localhost:<port>` in your browser. 
   - You can configure the port in `.env` file like so (default `8080`):
 ```dotenv
@@ -125,4 +132,4 @@ docker exec -it <container-name> /bin/bash
 ## Roadmap
 * [ ] initial composer install execution within docker container
 * [ ] use of docker alpine packages to create smaller container
-* [ ] set webroot of web application
+* [x] set webroot of web application
