@@ -25,3 +25,11 @@ services:
       - ./_docker/mariadb:/docker-entrypoint-initdb.d
     ports:
       - ${MARIADB_PORT}:3306
+
+  composer-install:
+    image: composer:latest
+    container_name: composer-install-${COMPOSE_PROJECT_NAME}
+    command: ["composer", "install"]
+    working_dir: /app
+    volumes:
+      - ./:/app

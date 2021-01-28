@@ -93,14 +93,22 @@ INSTALL_WKHTMLTOPDF=true
 - Then the binary from wkhtmltopdf is available in the container under `/usr/local/bin/wkhtmltopdf`, so set this path in your application settings
 
 
-### 6. Start your containers
+### 6. Composer install
+- `composer install` is executed per default on startup to install all the dependencies into your `vendor` folder.
+- To disable Composer  comment out the `composer-install:` service section in your `docker-compose.yml`
+- To manually run `composer install` just run the docker container specifically like this:
+```shell
+docker-compose run composer-install
+```
+
+### 7. Start your containers
 - After configuration you can start your containers with:
 ```shell
 docker-compose up
 ```
 
 
-### 7. Connect to database
+### 8. Connect to database
 - To connect your **application** to the database use the following credentials:
   - host: name of MySQL docker container `mariadb-<COMPOSE_PROJECT_NAME>`
     - `COMPOSE_PROJECT_NAME` defined in `.env` file
@@ -114,7 +122,7 @@ MARIADB_PORT=3307
 ```
 
 
-### 8. Open Application
+### 9. Open Application
 - To open the application frontend at root (`./`) open `localhost:<port>` in your browser. 
   - You can configure the port in `.env` file like so (default `8080`):
 ```dotenv
@@ -130,6 +138,6 @@ docker exec -it <container-name> /bin/bash
 ```
 
 ## Roadmap
-* [ ] initial composer install execution within docker container
+* [x] initial composer install execution within docker container
 * [ ] use of docker alpine packages to create smaller container
 * [x] set webroot of web application
