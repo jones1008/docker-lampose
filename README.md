@@ -1,13 +1,18 @@
-# Docker Setup
+# Docker Development Setup
 
 ## Notes:
 ### Note 1:
 If you make any changes to one of following files:
 - `docker-compose.yml`
+- `.env`
 
 make sure to tear down the related docker containers like so:
 ```shell
-docker-compose down -v
+docker-compose down
+```
+After that you can start it again with:
+```shell
+docker-compose up
 ```
 
 ### Note 2:
@@ -18,7 +23,6 @@ make sure to rebuild it without cache:
 ```shell
 docker-compose build --no-cache
 ```
-___
 After that you can start it again with:
 ```shell
 docker-compose up
@@ -116,7 +120,7 @@ docker-compose up
   - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
 - You can connect to the database from any client outside of docker (for example [DBeaver](https://dbeaver.io/)) on: 
   - host: `localhost` 
-  - port: can be configured in `.env` file like so (default `3307`):
+  - port: can be configured in `.env` file (default `3307`).  Make sure to restart the containers after changing it.
 ```dotenv
 MARIADB_PORT=3307
 ```
@@ -124,7 +128,7 @@ MARIADB_PORT=3307
 
 ### 9. Open Application
 - To open the application frontend at root (`./`) open `localhost:<port>` in your browser. 
-  - You can configure the port in `.env` file like so (default `8080`):
+  - You can configure the port in `.env` file (default `8080`). Make sure to restart the containers after changing it.
 ```dotenv
 APACHE_PORT=8080
 ```
