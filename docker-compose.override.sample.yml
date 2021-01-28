@@ -1,0 +1,13 @@
+services:
+  php-apache:
+    build:
+      args:
+        WKHTMLTOPDF: "false"
+    ports:
+      - 8080:80
+  mariadb:
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_DATABASE: ""
+    ports:
+      - 3307:3306

@@ -1,0 +1,22 @@
+services:
+  php-apache:
+    build:
+      context: ./_docker/php-apache
+      dockerfile: Dockerfile
+      args:
+        WKHTMLTOPDF: "false"
+    container_name: php-apache
+    environment:
+      PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
+    volumes:
+      - ./:/var/www/html
+      - ./_docker/php-apache/additional-inis:/usr/local/etc/php/conf.d/additional-inis
+
+  mariadb:
+    image: mariadb:10.5
+    container_name: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_DATABASE: ""
+    volumes:
+      - ./_docker/mariadb:/docker-entrypoint-initdb.d
