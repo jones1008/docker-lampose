@@ -48,15 +48,15 @@ docker-compose up
 ### 6. Connect to database
 #### Application config
 - To connect your **application** to the database use the following credentials:
-  - host: name of MariaDB docker container `mariadb-<COMPOSE_PROJECT_NAME>`
-    - `COMPOSE_PROJECT_NAME` is defined in `.env` file
-  - user: `root`
-  - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
+    - host: name of MariaDB docker container `mariadb-<COMPOSE_PROJECT_NAME>`
+        - `COMPOSE_PROJECT_NAME` is defined in `.env` file
+    - user: `root`
+    - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
   
 #### Connect from client
 - You can connect to the database from any client outside of docker (for example [DBeaver](https://dbeaver.io/)) on:
-  - host: `localhost`
-  - port: can be configured in `.env` file (default `3307`).  Make sure to restart the containers after changing it.
+    - host: `localhost`
+    - port: can be configured in `.env` file (default `3307`).  Make sure to restart the containers after changing it.
 ```dotenv
 MARIADB_PORT=3307
 ```
@@ -73,7 +73,7 @@ composer install
 
 ### 8. Open Application
 - To open the application frontend open `localhost:<port>` in your browser.
-  - You can configure the port in `.env` file (default `8080`). Make sure to restart the containers after changing it.
+    - You can configure the port in `.env` file (default `8080`). Make sure to restart the containers after changing it.
 ```dotenv
 APACHE_PORT=8080
 ```
@@ -113,7 +113,7 @@ docker-compose up
 
 ### 1. PHP setup
 - To specify the **PHP version** change the `FROM` command in `./_docker/apache-php/Dockerfile`
-  - e.g. for PHP version 5.6:
+    - e.g. for PHP version 5.6:
 ```dockerfile
 FROM php:5.6-apache
 ```
