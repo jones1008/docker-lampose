@@ -1,35 +1,7 @@
 # Docker Development Setup
 
-## Notes:
-### Note 1:
-If you make any changes to one of following files:
-- `docker-compose.yml`
-- `.env`
+# Configure and run the dockerized application:
 
-make sure to tear down the related docker containers like so:
-```shell
-docker-compose down
-```
-After that you can start it again with:
-```shell
-docker-compose up
-```
-
-### Note 2:
-If you make any changes to one of the following files:
-- any `Dockerfile`
-
-make sure to rebuild it without cache:
-```shell
-docker-compose build --no-cache
-```
-After that you can start it again with:
-```shell
-docker-compose up
-```
-
-
-## Configuration:
 ### 1. Create `.env` file
 - copy `.env.sample` to `.env`
 
@@ -51,87 +23,143 @@ MYSQL_DATABASE=database_name
 ```
 #### Import at initial startup:
 - To import a database at **initial** docker startup move a `.sql` file to `./_docker/mariadb/`
-- This will only be executed at first container startup. 
-  - Tear down the containers to start fresh and import your `.sql` file (see Note 1 above)
-
-
-### 3. PHP setup
-- To specify the **PHP version** change the `FROM` command in `./_docker/apache-php/Dockerfile`
-    - e.g. for PHP version 5.6:
-```dockerfile
-FROM php:5.6-apache
+- If the container is already running, stop it, tear it down and start it again so MariaDB imports it:
+```shell
+docker-compose down
+docker-compose up
 ```
-- After that make sure to build this container again (see Note 2 above)
-#### PHP Extensions:
-- To install and enable **PHP extensions** add them to `./_docker/apache-php/Dockerfile`.
-    - e.g. add and enable the PHP `mysql` extension like so:
-```dockerfile
-RUN docker-php-ext-install mysql && \
-    docker-php-ext-enable mysql
-```
-#### xdebug:
-- To enable xdebug set `xdebug.remote_enable` in `./_docker/apache-php/additional-inis/xdebug.ini` like so:
-```
-xdebug.remote_enable=1
-```
-- To edit any other xdebug configuration parameter add them within this `.ini` file
-- The correct xdebug version should be installed with the `_docker/apache-php/install-xdebug.sh` script with the first docker build.
-  
-#### Config
-- To edit any `php.ini` config, just add another `.ini` file to `_docker/apache-php/additional-inis/`
 
 ### 4. Webserver Setup
-- If you need to set the root directory of your web application other than `./` set it in `_docker/apache-php/sites-available/000-default.conf` like so:
+- If you need to set the root directory of your web application other than `./` (for example `/webroot`) set it in `_docker/apache-php/sites-available/000-default.conf` like so:
 ```apacheconf
 # ...
-DocumentRoot /var/www/html/some-sub-directory
+DocumentRoot /var/www/html/webroot
 ```
-- After that a **restart of docker-compose** is required.
-
-### 5. install wkhtmltopdf
-- If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency in the apache-php container add the following to your `.env` file:
-```dotenv
-INSTALL_WKHTMLTOPDF=true
-```
-- After that you have to **rebuild the container** (see Note 2 above)
-- Then the binary from wkhtmltopdf is available in the container under `/usr/local/bin/wkhtmltopdf`, so set this path in your application settings
+- After that you need to restart the container.
 
 
-### 6. Composer install
-- `composer install` is executed per default on startup to install all the dependencies into your `vendor` folder.
-- To disable Composer  comment out the `composer-install:` service section in your `docker-compose.yml`
-- To manually run `composer install` just run the docker container specifically like this:
-```shell
-docker-compose run composer-install
-```
-
-### 7. Start your containers
+### 5. Start your containers
 - After configuration you can start your containers with:
 ```shell
 docker-compose up
 ```
 
 
-### 8. Connect to database
+### 6. Connect to database
+#### Application config
 - To connect your **application** to the database use the following credentials:
-  - host: name of MySQL docker container `mariadb-<COMPOSE_PROJECT_NAME>`
-    - `COMPOSE_PROJECT_NAME` defined in `.env` file
+  - host: name of MariaDB docker container `mariadb-<COMPOSE_PROJECT_NAME>`
+    - `COMPOSE_PROJECT_NAME` is defined in `.env` file
   - user: `root`
   - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
-- You can connect to the database from any client outside of docker (for example [DBeaver](https://dbeaver.io/)) on: 
-  - host: `localhost` 
+  
+#### Connect from client
+- You can connect to the database from any client outside of docker (for example [DBeaver](https://dbeaver.io/)) on:
+  - host: `localhost`
   - port: can be configured in `.env` file (default `3307`).  Make sure to restart the containers after changing it.
 ```dotenv
 MARIADB_PORT=3307
 ```
 
 
-### 9. Open Application
-- To open the application frontend at root (`./`) open `localhost:<port>` in your browser. 
+### 7. Composer install
+- Install your PHP dependencies with `composer install` **inside** the docker container:
+```bash
+docker exec -it php-apache-<COMPOSE_PROJECT_NAME> /bin/bash
+composer install
+```
+- `COMPOSE_PROJECT_NAME` is defined in `.env` file
+
+
+### 8. Open Application
+- To open the application frontend open `localhost:<port>` in your browser.
   - You can configure the port in `.env` file (default `8080`). Make sure to restart the containers after changing it.
 ```dotenv
 APACHE_PORT=8080
 ```
+
+
+### 8. xdebug
+- xdebug is **installed and enabled by default**.
+- To **disable** xdebug change the file `./_docker/apache-php/additional-inis/xdebug.ini` to:
+```ini
+xdebug.remote_enable=0
+```
+- After that you need to restart the container.
+
+
+### 9. Configure WKHTMLTOPDF:
+- If installed the wkhtmltopdf binary will be available in the container under `/usr/local/bin/wkhtmltopdf`, so set this path in your application settings.
+
+
+
+# Dockerize the application:
+
+
+### Note 1:
+If you make any changes to one of the following files:
+- any `Dockerfile`
+
+make sure to rebuild it:
+```shell
+docker-compose build
+```
+After that you can start it again with:
+```shell
+docker-compose up
+```
+
+## Configuration:
+
+### 1. PHP setup
+- To specify the **PHP version** change the `FROM` command in `./_docker/apache-php/Dockerfile`
+  - e.g. for PHP version 5.6:
+```dockerfile
+FROM php:5.6-apache
+```
+- After that make sure to build this container again (see Note 1 above)
+
+#### PHP Extensions:
+- To install and enable **PHP extensions** add them to `./_docker/apache-php/Dockerfile`.
+```dockerfile
+RUN install-php-extensions <extensionname>
+```
+- If this did not work try this:
+```dockerfile
+RUN docker-php-ext-install <extensionname>
+```
+- All available extensions see here: https://github.com/mlocati/docker-php-extension-installer#supported-php-extensions
+- More information on https://hub.docker.com/_/php/ at *How to install more PHP extensions*
+
+#### Config
+- To edit any `php.ini` config, just add another `.ini` file to `_docker/apache-php/additional-inis/`
+
+
+### 2. Install Composer
+- To install Composer with container build change the `docker-compose.yml` to:
+```yaml
+services:
+  apache-php:
+    build:
+      # ...
+      args:
+        INSTALL_COMPOSER: "true"
+```
+- After that you have to rebuild the container (see Note 1)
+
+
+### 3. install wkhtmltopdf
+- If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
+```yaml
+services:
+  apache-php:
+    build:
+      # ...
+      args:
+        INSTALL_WKHTMLTOPDF: "false"
+```
+- After that you have to rebuild the container (see Note 1)
+- Then the binary from wkhtmltopdf is available in the container under `/usr/local/bin/wkhtmltopdf`, so set this path in your application settings
 
 
 ## Troubleshoot
@@ -141,7 +169,10 @@ APACHE_PORT=8080
 docker exec -it <container-name> /bin/bash
 ```
 
-## Roadmap
+
+# Roadmap
 * [x] initial composer install execution within docker container
-* [ ] use of docker alpine packages to create smaller container
+* [x] use of docker alpine packages to create smaller container
 * [x] set webroot of web application
+* [x] move wkhtmltopdf and composer to another dependency, and not .env bc it is git dependent
+* [x] Split Documentation in "Dockerize your application", "Run your application in Docker"
