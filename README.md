@@ -43,6 +43,8 @@ DocumentRoot /var/www/html/webroot
 ```shell
 docker-compose up
 ```
+- Make sure to start the docker daemon first ([Docker Desktop](https://www.docker.com/get-started))
+- Tip: The Dashboard of Docker Desktop can be quite useful to manage your containers.
 
 
 ### 6. Connect to database
@@ -81,9 +83,17 @@ APACHE_PORT=8080
 
 ### 8. xdebug
 - xdebug is **installed and enabled by default**.
-- To **disable** xdebug change the file `./_docker/apache-php/additional-inis/xdebug.ini` to:
+- To disable xdebug with PHP version `< 7.2` change the file `./_docker/apache-php/additional-inis/xdebug.ini` to:
 ```ini
 xdebug.remote_enable=0
+```
+- To disable xdebug with PHP version `>= 7.2` change the file `./_docker/apache-php/additional-inis/xdebug.ini` to:
+```ini
+xdebug.mode=off
+```
+- To enable xdebug with PHP version `>= 7.2` change the file `./_docker/apache-php/additional-inis/xdebug.ini` to:
+```ini
+xdebug.mode=debug
 ```
 - After that you need to restart the container.
 
@@ -168,6 +178,10 @@ services:
 ```shell
 docker exec -it <container-name> /bin/bash
 ```
+- If this doesn't work try this:
+```shell
+docker exec -it <container-name> /bin/sh
+```
 
 
 # Roadmap
@@ -176,3 +190,7 @@ docker exec -it <container-name> /bin/bash
 * [x] set webroot of web application
 * [x] move wkhtmltopdf and composer to another dependency, and not .env bc it is git dependent
 * [x] Split Documentation in "Dockerize your application", "Run your application in Docker"
+* [ ] support for multiple sql files imported into seperate databases
+* [ ] performance improvements (install php-fpm + apache, require vendor takes long -> problem with docker volume mounting read performance)
+* [ ] support for local hostname with custom web application port to support multiple docker instances at once
+* [ ] get apache error/access log working on server
