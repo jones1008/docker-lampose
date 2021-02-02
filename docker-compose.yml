@@ -21,8 +21,8 @@ services:
     container_name: mariadb-${COMPOSE_PROJECT_NAME}
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
       - ./_docker/mariadb:/docker-entrypoint-initdb.d
+      - ./_docker/mariadb/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
       - ${MARIADB_PORT}:3306

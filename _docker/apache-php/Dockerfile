@@ -40,3 +40,6 @@ RUN if [ "$INSTALL_COMPOSER" = "true" ]; then \
         && mv composer.phar /usr/local/bin/composer \
         && apt-get install -y git \
     ;fi
+
+# removes a DNS warning at startup:
+RUN echo "ServerName localhost" | tee /etc/apache2/conf-available/fqdn.conf && a2enconf fqdn
