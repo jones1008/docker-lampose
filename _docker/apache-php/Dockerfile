@@ -7,7 +7,8 @@ RUN a2enmod rewrite
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
 ### common PHP extensions (add PHP extensions here as explained in README.md)
-RUN install-php-extensions opcache  # for better performance
+RUN install-php-extensions opcache  # for 2x better performance
+RUN install-php-extensions pdo_mysql  # for mysqli connections
 RUN install-php-extensions mysqli  # requires php7.0 or higher
 #RUN install-php-extensions gd
 #RUN install-php-extensions intl

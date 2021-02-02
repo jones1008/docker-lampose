@@ -1,5 +1,5 @@
 services:
-  php:
+  apache-php:
     build:
       context: _docker/apache-php
       dockerfile: Dockerfile

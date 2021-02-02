@@ -37,15 +37,20 @@ DocumentRoot /var/www/html/webroot
 ```
 - After that you need to restart the container.
 
+### 5. Download and configure Docker Desktop
+- If you are on Windows or Mac download and install [Docker Desktop](https://www.docker.com/get-started) if you haven't already.
+- If you are on Winodws make sure to **disable the WSL 2 based engine** and use the Hyper-V backend instead as this can lead to performance issues with docker volumes.
+  - this can be done in the Docker Desktop Dashboard:
+![_docker/hyper-v.png](_docker/hyper-v.png)
 
-### 5. Start your containers
+### 6. Start your containers
 - After configuration you can start your containers with:
 ```shell
 docker-compose up
 ```
-- Make sure to start the docker daemon first ([Docker Desktop](https://www.docker.com/get-started))
+- Make sure to start the docker daemon first ([Docker Desktop](https://www.docker.com/get-started)).
+- The first time executing this takes a few minutes.
 - Tip: The Dashboard of Docker Desktop can be quite useful to manage your containers.
-
 
 ### 6. Connect to database
 #### Application config
@@ -191,6 +196,8 @@ docker exec -it <container-name> /bin/sh
 * [x] move wkhtmltopdf and composer to another dependency, and not .env bc it is git dependent
 * [x] Split Documentation in "Dockerize your application", "Run your application in Docker"
 * [ ] support for multiple sql files imported into seperate databases
-* [ ] performance improvements (install php-fpm + apache, require vendor takes long -> problem with docker volume mounting read performance)
-* [ ] support for local hostname with custom web application port to support multiple docker instances at once
+* [x] performance improvements (switch to hyper-v)
+* [ ] support for local hostname with custom web application port to support multiple docker instances at once or just choose next free port
 * [ ] get apache error/access log working on server
+* [ ] echo of localhost:8080 after starting container
+* [ ] setup for https connections (sgv project?)
