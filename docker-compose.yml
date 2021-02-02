@@ -7,6 +7,7 @@ services:
         INSTALL_COMPOSER: "true"        # change requires container rebuild
         INSTALL_WKHTMLTOPDF: "false"    # change requires container rebuild
     container_name: apache-php-${COMPOSE_PROJECT_NAME}
+    command: sh -c "sleep 1 && echo 'application started at http://localhost:${APACHE_PORT}' & exec 'apache2-foreground'"
     environment:
       PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
     volumes:
@@ -14,7 +15,9 @@ services:
       - ./_docker/apache-php/additional-inis:/usr/local/etc/php/conf.d/additional-inis
       - ./_docker/apache-php/sites-available:/etc/apache2/sites-available
     ports:
-      - ${APACHE_PORT}:80
+      - "${APACHE_PORT}:80"
+    depends_on:
+      - mariadb
 
   mariadb:
     image: jbergstroem/mariadb-alpine:10.4.15  # alpine image is a lot smaller than official mariadb image
@@ -25,4 +28,4 @@ services:
       - ./_docker/mariadb:/docker-entrypoint-initdb.d
       - ./_docker/mariadb/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
-      - ${MARIADB_PORT}:3306
+      - "${MARIADB_PORT}:3306"

@@ -215,7 +215,6 @@ docker exec -it <container-name> /bin/sh
 * [x] support for multiple sql files imported into seperate databases
 * [x] add my.cnf for easier configuration
 * [x] performance improvements (switch to hyper-v)
-* [ ] support for local hostname with custom web application port to support multiple docker instances at once or just choose next free port
+* [x] echo of localhost:<port> after starting container
 * [ ] get apache error/access log working on server
-* [ ] echo of localhost:8080 after starting container
 * [ ] setup for https connections (sgv project?)
