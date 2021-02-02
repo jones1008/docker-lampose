@@ -216,5 +216,4 @@ docker exec -it <container-name> /bin/sh
 * [x] add my.cnf for easier configuration
 * [x] performance improvements (switch to hyper-v)
 * [x] echo of localhost:<port> after starting container
-* [ ] get apache error/access log working on server
 * [ ] setup for https connections (sgv project?)
