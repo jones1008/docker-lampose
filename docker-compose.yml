@@ -4,7 +4,6 @@ services:
       context: _docker/apache-php
       dockerfile: Dockerfile
       args:
-        INSTALL_COMPOSER: "true"        # change requires container rebuild
         INSTALL_WKHTMLTOPDF: "false"    # change requires container rebuild
     container_name: apache-php-${COMPOSE_PROJECT_NAME}
     command: sh -c "sleep 1 && echo 'application started at http://localhost:${APACHE_PORT}' & exec 'apache2-foreground'"
@@ -29,3 +28,10 @@ services:
       - ./_docker/mariadb/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
       - "${MARIADB_PORT}:3306"
+
+  composer-install:
+    container_name: composer-install-${COMPOSE_PROJECT_NAME}
+    image: composer:2
+    volumes:
+      - ./:/app
+    command: composer install --ignore-platform-reqs

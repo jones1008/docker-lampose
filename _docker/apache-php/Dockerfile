@@ -1,4 +1,4 @@
-FROM php:7.2-apache
+FROM php:7.4-apache
 
 # enable apache module rewrite
 RUN a2enmod rewrite
@@ -31,15 +31,8 @@ RUN if [ "$INSTALL_WKHTMLTOPDF" = "true" ]; then \
         && dpkg -i wkhtmltopdf.deb \
     ;fi
 
-# install composer and git
-ARG INSTALL_COMPOSER="false"
-RUN if [ "$INSTALL_COMPOSER" = "true" ]; then \
-           apt-get install -y unzip \
-        && curl -sS https://getcomposer.org/installer | php \
-        && chmod +x composer.phar \
-        && mv composer.phar /usr/local/bin/composer \
-        && apt-get install -y git \
-    ;fi
+# install composer
+RUN install-php-extensions @composer-2
 
 # removes a DNS warning at startup:
 RUN echo "ServerName localhost" | tee /etc/apache2/conf-available/fqdn.conf && a2enconf fqdn

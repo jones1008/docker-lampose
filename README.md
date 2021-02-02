@@ -78,10 +78,12 @@ MARIADB_PORT=3307
 
 
 ### 7. Composer install
-Install your PHP dependencies with `composer install` **inside** the docker container:
+`composer install` is automatically executed at container startup. 
+
+If you want to manually execute another composer command execute it in the container: 
 ```bash
-docker exec -it php-apache-<COMPOSE_PROJECT_NAME> /bin/bash
-composer install
+docker exec -it apache-php-<COMPOSE_PROJECT_NAME> /bin/bash
+composer <any-composer-command>
 ```
 `COMPOSE_PROJECT_NAME` is defined in `.env` file
 
@@ -95,7 +97,7 @@ APACHE_PORT=8080
 ```
 
 
-### 8. xdebug
+### 9. xdebug
 xdebug is **installed and enabled by default**.
 
 To disable xdebug with PHP version `< 7.2` change the file `./_docker/apache-php/additional-inis/xdebug.ini` to:
@@ -113,7 +115,7 @@ xdebug.mode=debug
 After that you need to restart the container.
 
 
-### 9. Configure WKHTMLTOPDF:
+### 10. Configure WKHTMLTOPDF:
 If installed the wkhtmltopdf binary will be available in the container under `/usr/local/bin/wkhtmltopdf`, so set this path in your application settings.
 
 
@@ -167,6 +169,10 @@ If you need to configure some database parameters (for example `innodb_file_form
 
 
 ### 3. Install Composer
+Composer is installed by default in a separate container.
+
+If you want 
+If and execute `composer install` at startup 
 To install Composer with container build change the `docker-compose.yml` to:
 ```yaml
 services:
@@ -216,4 +222,6 @@ docker exec -it <container-name> /bin/sh
 * [x] add my.cnf for easier configuration
 * [x] performance improvements (switch to hyper-v)
 * [x] echo of localhost:<port> after starting container
+* [ ] further installation logic (composer install, npm install, etc...)
 * [ ] setup for https connections (sgv project?)
+* [ ] reuse mariadb container across multiple projects?
