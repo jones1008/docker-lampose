@@ -169,23 +169,23 @@ If you need to configure some database parameters (for example `innodb_file_form
 
 
 ### 3. Install Composer
-Composer is installed by default in a separate container.
+Composer is installed by default in a separate container and it runs `composer install` at startup.
 
-If you want 
-If and execute `composer install` at startup 
-To install Composer with container build change the `docker-compose.yml` to:
+If you want to disable it comment out the `composer-install` service in the `docker-compose.yml`:
 ```yaml
 services:
-  apache-php:
-    build:
-      # ...
-      args:
-        INSTALL_COMPOSER: "true"
+  # ...
+#  composer-install:
+#    image: ...
+#    ...
 ```
-After that you have to rebuild the container (see Note 1)
 
+### 4. Run `npm install` at startup
+To run npm install at startup, uncomment the `npm-install` service in the `docker-compose.yml`.
 
-### 4. install wkhtmltopdf
+If your `package.json` is not in the root directory of your project, change the volume to `path/to/sub/dir:/app`
+
+### 5. install wkhtmltopdf
 If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
 ```yaml
 services:

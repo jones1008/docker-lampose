@@ -35,3 +35,11 @@ services:
     volumes:
       - ./:/app
     command: composer install --ignore-platform-reqs
+
+#  npm-install:
+#    image: node:15.7-alpine3.12
+#    container_name: npm-install-${COMPOSE_PROJECT_NAME}
+#    working_dir: /app
+#    command: npm install --no-update-notifier
+#    volumes:
+#      - ./:/app
