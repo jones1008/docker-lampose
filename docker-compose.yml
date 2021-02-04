@@ -1,20 +1,21 @@
 services:
-  apache-php:
+  web:
     build:
-      context: _docker/apache-php
+      context: _docker/web
       dockerfile: Dockerfile
       args:
         INSTALL_WKHTMLTOPDF: "false"    # change requires container rebuild
-    container_name: apache-php-${COMPOSE_PROJECT_NAME}
-    command: sh -c "sleep 1 && echo 'application started at http://localhost:${APACHE_PORT}' & exec 'apache2-foreground'"
+    container_name: web-${COMPOSE_PROJECT_NAME}
+    command: sh -c "/var/www/html/_docker/web/startup.sh ${COMPOSE_PROJECT_NAME} ${LOOPBACK_IP} ${DOMAIN}"
     environment:
       PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
     volumes:
       - ./:/var/www/html
-      - ./_docker/apache-php/additional-inis:/usr/local/etc/php/conf.d/additional-inis
-      - ./_docker/apache-php/sites-available:/etc/apache2/sites-available
+      - ./_docker/web/additional-inis:/usr/local/etc/php/conf.d/additional-inis
+      - ./_docker/web/sites-available:/etc/apache2/sites-available
+      - ${HOSTS_FILE}:/tmp/hostsfile
     ports:
-      - "${APACHE_PORT}:80"
+      - "${LOOPBACK_IP}:80:80"
     depends_on:
       - mariadb
 

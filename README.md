@@ -6,17 +6,39 @@
 - copy `.env.sample` to `.env`
 
 
-### 2. Set your project name
+### 2. Set some important variables
 Set your project name in the `.env` file like so:
 ```dotenv
 COMPOSE_PROJECT_NAME=my-project
 ```
 This prevents container name collisions in the future.
+___
+Set an **unused loopback IP** from the IP range `127.0.0.0/8` in your `.env` file. Unused means the IP does not appear in your `hosts` file
+```dotenv
+LOOPBACK_IP=127.55.0.1
+```
+This is needed to configure a custom domain your application will be available at.
+___
+Set a custom domain your application will be available at:
+```dotenv
+DOMAIN=test.local
+```
+If not set this will be set to `<COMPOSE_PROJECT_NAME>.local`.
+___
+Set the absolute path to your `hosts` file on your OS:
+```dotenv
+HOSTS_FILE=/c/Windows/System32/drivers/etc/hosts    # use this for Windows
+#HOSTS_FILE=/etc/hosts                              # use this for Linux
+#HOSTS_FILE=/private/etc/hosts                      # use this for MacOS
+```
+This is needed to automatically set your domain in your hosts file.
 
+>**Important**: Make sure your `hosts` file is writable. On Windows this is done like this:
+![_docker/docs/writable-hosts-file.png](_docker/docs/writable-hosts-file.png)
 
 ### 3. Database
 #### Config:
-Set the password for all your databases in the `.env` file:
+Set a password for all your databases of this project in the `.env` file:
 ```dotenv
 MYSQL_ROOT_PASSWORD=password
 ```
@@ -32,7 +54,7 @@ docker-compose up
 ```
 
 ### 4. Webserver Setup
-If you need to set the root directory of your web application other than `./` (for example `/webroot`) set it in `_docker/apache-php/sites-available/000-default.conf`:
+If you need to set the root directory of your web application other than `./` (for example `/webroot`) set it in `_docker/web/sites-available/000-default.conf`:
 ```apacheconf
 # ...
 DocumentRoot /var/www/html/webroot
@@ -45,7 +67,7 @@ If you are on Windows or Mac download and install [Docker Desktop](https://www.d
 If you are on Winodws make sure to **disable the WSL 2 based engine** and use the Hyper-V backend instead as this can lead to performance issues with docker volumes (10x faster).
 
 This can be done in the Docker Desktop Dashboard:
-![_docker/hyper-v.png](_docker/hyper-v.png)
+![_docker/docs/hyper-v.png](_docker/docs/hyper-v.png)
 
 ### 6. Start your containers
 After configuration you can start your containers with:
@@ -82,33 +104,30 @@ MARIADB_PORT=3307
 
 If you want to manually execute another composer command execute it in the container: 
 ```bash
-docker exec -it apache-php-<COMPOSE_PROJECT_NAME> /bin/bash
+docker exec -it web-<COMPOSE_PROJECT_NAME> /bin/bash
 composer <any-composer-command>
 ```
 `COMPOSE_PROJECT_NAME` is defined in `.env` file
 
 
 ### 8. Open Application
-To open the application frontend open `localhost:<port>` in your browser.
+To open the application frontend open `http://<DOMAIN>` in your browser.
 
-You can configure the port in `.env` file (default `8080`). Make sure to restart the containers after changing it.
-```dotenv
-APACHE_PORT=8080
-```
+You can configure your `DOMAIN` in `.env` file. Make sure to restart the containers after changing it.
 
 
 ### 9. xdebug
 xdebug is **installed and enabled by default**.
 
-To disable xdebug with PHP version `< 7.2` change the file `./_docker/apache-php/additional-inis/xdebug.ini` to:
+To disable xdebug with PHP version `< 7.2` change the file `./_docker/web/additional-inis/xdebug.ini` to:
 ```ini
 xdebug.remote_enable=0
 ```
-To disable xdebug with PHP version `>= 7.2` change the file `./_docker/apache-php/additional-inis/xdebug.ini` to:
+To disable xdebug with PHP version `>= 7.2` change the file `./_docker/web/additional-inis/xdebug.ini` to:
 ```ini
 xdebug.mode=off
 ```
-To enable xdebug with PHP version `>= 7.2` change the file `./_docker/apache-php/additional-inis/xdebug.ini` to:
+To enable xdebug with PHP version `>= 7.2` change the file `./_docker/web/additional-inis/xdebug.ini` to:
 ```ini
 xdebug.mode=debug
 ```
@@ -139,7 +158,7 @@ docker-compose up
 ## Configuration:
 
 ### 1. PHP setup
-To specify the **PHP version** change the `FROM` command in `./_docker/apache-php/Dockerfile`
+To specify the **PHP version** change the `FROM` command in `./_docker/web/Dockerfile`
 
 e.g. for PHP version 5.6:
 ```dockerfile
@@ -148,7 +167,7 @@ FROM php:5.6-apache
 After that make sure to build this container again (see Note 1 above)
 
 #### PHP Extensions:
-To install and enable **PHP extensions** add them to `./_docker/apache-php/Dockerfile`.
+To install and enable **PHP extensions** add them to `./_docker/web/Dockerfile`.
 ```dockerfile
 RUN install-php-extensions <extensionname>
 ```
@@ -161,7 +180,7 @@ All available extensions see here: https://github.com/mlocati/docker-php-extensi
 More information on https://hub.docker.com/_/php/ at *How to install more PHP extensions*
 
 #### Config:
-To edit any `php.ini` config, just add another `.ini` file to `_docker/apache-php/additional-inis/`
+To edit any `php.ini` config, just add another `.ini` file to `_docker/web/additional-inis/`
 
 
 ### 2. Database configuration
@@ -183,13 +202,13 @@ services:
 ### 4. Run `npm install` at startup
 To run npm install at startup, uncomment the `npm-install` service in the `docker-compose.yml`.
 
-If your `package.json` is not in the root directory of your project, change the volume to `path/to/sub/dir:/app`
+If your `package.json` is not in the root directory of your project, change the volume to `./path/to/sub/dir:/app`
 
 ### 5. install wkhtmltopdf
 If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
 ```yaml
 services:
-  apache-php:
+  web:
     build:
       # ...
       args:
@@ -222,6 +241,9 @@ docker exec -it <container-name> /bin/sh
 * [x] add my.cnf for easier configuration
 * [x] performance improvements (switch to hyper-v)
 * [x] echo of localhost:<port> after starting container
-* [ ] further installation logic (composer install, npm install, etc...)
+* [x] further installation logic (composer install, npm install, etc...)
+* [x] some method to run several projects at the same time without port collision and easy access to web and database
+* [x] automatic adding of host resolution to hosts file with startup script
 * [ ] setup for https connections (sgv project?)
-* [ ] reuse mariadb container across multiple projects?
+* [ ] avoid port collision on mariadb containers
+* [ ] WKHTMLTOPDF in it's own container (ask robin for bti credentials to test it)

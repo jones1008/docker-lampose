@@ -13,13 +13,14 @@ RUN install-php-extensions mysqli  # requires php7.0 or higher
 #RUN install-php-extensions gd
 #RUN install-php-extensions intl
 #RUN install-php-extensions zip
+#...
 
 
 # install correct xdebug version with script (https://xdebug.org/)
 COPY ./install-xdebug.sh /
 RUN /install-xdebug.sh && docker-php-ext-enable xdebug
 
-# update apk (Alpine Package Manager) and install commonly used packages
+# update and install commonly used packages
 RUN apt-get update
 RUN apt-get install -y curl
 
