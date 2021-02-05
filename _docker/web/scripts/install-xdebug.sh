@@ -1,4 +1,5 @@
 #!/bin/bash
+# WARN: any change in this script requires a docker container rebuild to take effect
 
 # xdebug versions with PHP versions see: https://xdebug.org/docs/compat and https://web.archive.org/web/20191207092254/https://xdebug.org/docs/compat
 
@@ -22,5 +23,5 @@ elif gte 5.4 $phpFullVersion; then
   echo "installing xdebug 2.4.1"
   pecl install xdebug-2.4.1
 else
-  echo "ERROR while trying to install xdebug: invalid or too old version number: "$phpFullVersion
+  echo "[ERROR] while trying to install xdebug: invalid or too old version number: "$phpFullVersion
 fi

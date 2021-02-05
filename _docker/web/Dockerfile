@@ -1,5 +1,7 @@
 FROM php:7.4-apache
 
+WORKDIR /var/www/html
+
 # enable apache module rewrite
 RUN a2enmod rewrite
 
@@ -15,25 +17,29 @@ RUN install-php-extensions mysqli  # requires php7.0 or higher
 #RUN install-php-extensions zip
 #...
 
+# copy scripts directory into container
+COPY ./scripts ./_docker/web/scripts
 
 # install correct xdebug version with script (https://xdebug.org/)
-COPY ./install-xdebug.sh /
-RUN /install-xdebug.sh && docker-php-ext-enable xdebug
+RUN ./_docker/web/scripts/install-xdebug.sh
+RUN docker-php-ext-enable xdebug
 
-# update and install commonly used packages
-RUN apt-get update
-RUN apt-get install -y curl
-
-# install wkhtmltopdf and it's dependencies (https://wkhtmltopdf.org/)
-ARG INSTALL_WKHTMLTOPDF="false"
-RUN if [ "$INSTALL_WKHTMLTOPDF" = "true" ]; then \
-           apt-get install -y libxrender1 libjpeg62-turbo fontconfig libxtst6 xfonts-75dpi xfonts-base xz-utils \
-        && curl "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.stretch_amd64.deb" -L -o "wkhtmltopdf.deb" \
-        && dpkg -i wkhtmltopdf.deb \
-    ;fi
 
 # install composer
-RUN install-php-extensions @composer-2
+RUN install-php-extensions @composer
+
+# prepare other installations
+RUN apt-get update && apt-get install -y curl
+
+# install npm
+RUN curl -sL https://deb.nodesource.com/setup_lts.x | bash - && apt-get install -y nodejs
+
+# install wkhtmltopdf (https://wkhtmltopdf.org/)
+ARG INSTALL_WKHTMLTOPDF="false"
+RUN if [ "$INSTALL_WKHTMLTOPDF" = "true" ]; then \
+       DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y --no-install-recommends wkhtmltopdf \
+    ;fi
+
 
 # removes a DNS warning at startup:
 RUN echo "ServerName localhost" | tee /etc/apache2/conf-available/fqdn.conf && a2enconf fqdn

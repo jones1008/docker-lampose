@@ -103,15 +103,16 @@ MARIADB_PORT=3307
 ```
 
 
-### 7. Composer install
-`composer install` is automatically executed at container startup. 
+### 7. Composer and NPM install
+`composer install` and `npm install` is automatically executed at container startup if configured. 
 
-If you want to manually execute another composer command execute it in the container: 
+If you want to manually execute another `composer` or `npm` command execute it in the container: 
 ```bash
 docker exec -it web-<COMPOSE_PROJECT_NAME> /bin/bash
 composer <any-composer-command>
+npm <any-npm-command>
 ```
-`COMPOSE_PROJECT_NAME` is defined in `.env` file
+`COMPOSE_PROJECT_NAME` is defined in your `.env` file
 
 
 ### 8. Open Application
@@ -139,7 +140,7 @@ After that you need to restart the container.
 
 
 ### 10. Configure WKHTMLTOPDF:
-If installed the wkhtmltopdf binary will be available in the container under `/usr/local/bin/wkhtmltopdf`, so set this path in your application settings.
+If installed the wkhtmltopdf binary will be available in the container under `/usr/bin/wkhtmltopdf`, so set this path in your application settings.
 
 
 
@@ -192,21 +193,24 @@ If you need to configure some database parameters (for example `innodb_file_form
 
 
 ### 3. Install Composer
-Composer is installed by default in a separate container and it runs `composer install` at startup.
-
-If you want to disable it comment out the `composer-install` service in the `docker-compose.yml`:
+Composer is installed per default, and it runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
 ```yaml
 services:
-  # ...
-#  composer-install:
-#    image: ...
-#    ...
+  web:
+    # ...
+    environment:
+      COMPOSER_INSTALL_PATH: ./
 ```
 
 ### 4. Run `npm install` at startup
-To run npm install at startup, uncomment the `npm-install` service in the `docker-compose.yml`.
-
-If your `package.json` is not in the root directory of your project, change the volume to `./path/to/sub/dir:/app`
+Node.js and `npm` is installed per default, and it automatically runs `npm install` in the directory you specified with:  
+```yaml
+services:
+  web:
+    # ...
+    environment:
+      NPM_INSTALL_PATH: ./path/to/sub/dir
+```
 
 ### 5. install wkhtmltopdf
 If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
@@ -216,11 +220,9 @@ services:
     build:
       # ...
       args:
-        INSTALL_WKHTMLTOPDF: "false"
+        INSTALL_WKHTMLTOPDF: "true"
 ```
 After that you have to rebuild the container (see Note 1)
-
-Then the binary from wkhtmltopdf is available in the container under `/usr/local/bin/wkhtmltopdf`, so set this path in your application settings
 
 
 ## Troubleshoot
@@ -248,6 +250,5 @@ docker exec -it <container-name> /bin/sh
 * [x] further installation logic (composer install, npm install, etc...)
 * [x] some method to run several projects at the same time without port collision and easy access to web and database
 * [x] automatic adding of host resolution to hosts file with startup script
+* [x] make npm and composer available in main container
 * [ ] setup for https connections (sgv project?)
-* [ ] WKHTMLTOPDF in it's own container (ask robin for bti credentials to test it)
-* [ ] smaller container images?

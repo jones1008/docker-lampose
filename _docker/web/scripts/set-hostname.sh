@@ -1,10 +1,7 @@
 #!/bin/sh
+# WARN: any change in this script requires a docker container rebuild to take effect
 
 # this script adds entries to the hosts file
-
-COMPOSE_PROJECT_NAME=$1
-LOOPBACK_IP=$2
-DOMAIN=$3
 
 HOSTSFILE=/tmp/hostsfile
 TMPHOSTSFILE=/tmp/tmphostsfile
@@ -18,7 +15,7 @@ if [ -n "$LOOPBACK_IP" ]; then
   if [ -z "$DOMAIN" ]; then
     # setting DOMAIN to computed value
     echo "[INFO]: HOSTSFILE: setting DOMAIN to "${COMPOSE_PROJECT_NAME}".docker"
-    DOMAIN=${COMPOSE_PROJECT_NAME}".docker"
+    export DOMAIN=${COMPOSE_PROJECT_NAME}".docker"
   fi
 
   if grep -q -P "^\s*(?!${LOOPBACK_IP})([0-9]{1,3}[\.]){3}[0-9]{1,3}\s+${DOMAIN}" "$TMPHOSTSFILE"; then
@@ -56,9 +53,6 @@ if [ -n "$LOOPBACK_IP" ]; then
 
   # remove temporary hosts file
   rm "$TMPHOSTSFILE"
-
-  # start application
-  sleep 1 && echo application started at http://${DOMAIN} & exec 'apache2-foreground'
 
 else
   echo "[ERROR]: HOSTSFILE: Environment variable LOOPBACK_IP is not set"

@@ -6,9 +6,12 @@ services:
       args:
         INSTALL_WKHTMLTOPDF: "false"    # change requires container rebuild
     container_name: web-${COMPOSE_PROJECT_NAME}
-    command: sh -c "/var/www/html/_docker/web/startup.sh ${COMPOSE_PROJECT_NAME} ${LOOPBACK_IP} ${DOMAIN}"
+    command: sh -c "./_docker/web/scripts/set-hostname.sh && ./_docker/web/scripts/startup.sh"
     environment:
       PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
+      COMPOSER_INSTALL_PATH: ./
+      NPM_INSTALL_PATH: ./
+    env_file: .env
     volumes:
       - ./:/var/www/html
       - ./_docker/web/additional-inis:/usr/local/etc/php/conf.d/additional-inis
@@ -29,18 +32,3 @@ services:
       - ./_docker/mariadb/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
       - "${MARIADB_PORT}:3306"
-
-  composer-install:
-    container_name: composer-install-${COMPOSE_PROJECT_NAME}
-    image: composer:2
-    volumes:
-      - ./:/app
-    command: composer install --ignore-platform-reqs
-
-#  npm-install:
-#    image: node:15-alpine
-#    container_name: npm-install-${COMPOSE_PROJECT_NAME}
-#    working_dir: /app
-#    command: npm install --no-update-notifier
-#    volumes:
-#      - ./:/app
