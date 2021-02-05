@@ -23,7 +23,7 @@ Set a custom domain your application will be available at:
 ```dotenv
 DOMAIN=test.docker
 ```
-If not set this will be set to `<COMPOSE_PROJECT_NAME>.docker`.
+If `DOMAIN` is not set this will be set to `<COMPOSE_PROJECT_NAME>.docker`.
 ___
 Set the absolute path to your `hosts` file on your OS:
 ```dotenv
@@ -251,4 +251,6 @@ docker exec -it <container-name> /bin/sh
 * [x] some method to run several projects at the same time without port collision and easy access to web and database
 * [x] automatic adding of host resolution to hosts file with startup script
 * [x] make npm and composer available in main container
+* [x] fix startup.sh output when DOMAIN is undefined
+* [ ] support for multiple npm/composer install directories
 * [ ] setup for https connections (sgv project?)

@@ -1,5 +1,20 @@
 #!/bin/sh
-# WARN: any change in this script requires a docker container rebuild to take effect
+
+if [ -z "$COMPOSE_PROJECT_NAME" ]; then
+  echo "[ERROR]: required environment variable COMPOSE_PROJECT_NAME not set"
+  return 1
+fi
+
+if [ -z "$DOMAIN" ]; then
+  # setting DOMAIN to computed value
+  echo "[INFO]: setting environment variable DOMAIN to "${COMPOSE_PROJECT_NAME}".docker"
+  export DOMAIN=${COMPOSE_PROJECT_NAME}".docker"
+fi
+
+
+# call set-hostname.sh
+sh ./_docker/web/scripts/set-hostname.sh
+
 
 WD=/var/www/html
 
