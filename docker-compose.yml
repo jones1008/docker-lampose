@@ -9,8 +9,8 @@ services:
     command: sh -c "./_docker/web/scripts/startup.sh"
     environment:
       PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
-      COMPOSER_INSTALL_PATH: ./
-#      NPM_INSTALL_PATH: ./
+      COMPOSER_INSTALL_PATHS: ./
+#      NPM_INSTALL_PATHS: ./
     env_file: .env
     volumes:
       - ./:/var/www/html

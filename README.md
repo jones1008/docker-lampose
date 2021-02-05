@@ -199,8 +199,13 @@ services:
   web:
     # ...
     environment:
-      COMPOSER_INSTALL_PATH: ./
+      COMPOSER_INSTALL_PATHS: ./
 ```
+If you need to execute `composer install` in multiple paths you can do this by separating them by a `:`:
+```yaml
+COMPOSER_INSTALL_PATHS: ./path:./another/path
+```
+
 
 ### 4. Run `npm install` at startup
 Node.js and `npm` is installed per default, and it automatically runs `npm install` in the directory you specified with:  
@@ -209,8 +214,13 @@ services:
   web:
     # ...
     environment:
-      NPM_INSTALL_PATH: ./path/to/sub/dir
+      NPM_INSTALL_PATHS: ./path/to/sub/dir
 ```
+If you need to execute `npm install` in multiple paths you can do this by separating them by a `:`:
+```yaml
+NPM_INSTALL_PATHS: ./path:./another/path
+```
+
 
 ### 5. install wkhtmltopdf
 If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
@@ -252,5 +262,5 @@ docker exec -it <container-name> /bin/sh
 * [x] automatic adding of host resolution to hosts file with startup script
 * [x] make npm and composer available in main container
 * [x] fix startup.sh output when DOMAIN is undefined
-* [ ] support for multiple npm/composer install directories
+* [x] support for multiple npm/composer install directories
 * [ ] setup for https connections (sgv project?)
