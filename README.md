@@ -21,9 +21,9 @@ This is needed to configure a custom domain your application will be available a
 ___
 Set a custom domain your application will be available at:
 ```dotenv
-DOMAIN=test.local
+DOMAIN=test.docker
 ```
-If not set this will be set to `<COMPOSE_PROJECT_NAME>.local`.
+If not set this will be set to `<COMPOSE_PROJECT_NAME>.docker`.
 ___
 Set the absolute path to your `hosts` file on your OS:
 ```dotenv
@@ -41,6 +41,10 @@ This is needed to automatically set your domain in your hosts file.
 Set a password for all your databases of this project in the `.env` file:
 ```dotenv
 MYSQL_ROOT_PASSWORD=password
+```
+Set a free port where your MariaDB Server will be available in the `.env` file. Ideally this is a port that is not used by another docker container:
+```dotenv
+MARIADB_PORT=3307
 ```
 #### Import at initial startup:
 To import a database at **initial** docker startup move a `.sql` file to `./_docker/mariadb/sql`
@@ -245,5 +249,5 @@ docker exec -it <container-name> /bin/sh
 * [x] some method to run several projects at the same time without port collision and easy access to web and database
 * [x] automatic adding of host resolution to hosts file with startup script
 * [ ] setup for https connections (sgv project?)
-* [ ] avoid port collision on mariadb containers
 * [ ] WKHTMLTOPDF in it's own container (ask robin for bti credentials to test it)
+* [ ] smaller container images?

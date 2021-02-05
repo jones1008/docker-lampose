@@ -17,8 +17,8 @@ if [ -n "$LOOPBACK_IP" ]; then
 
   if [ -z "$DOMAIN" ]; then
     # setting DOMAIN to computed value
-    echo "[INFO]: HOSTSFILE: setting DOMAIN to "${COMPOSE_PROJECT_NAME}".local"
-    DOMAIN=${COMPOSE_PROJECT_NAME}".local"
+    echo "[INFO]: HOSTSFILE: setting DOMAIN to "${COMPOSE_PROJECT_NAME}".docker"
+    DOMAIN=${COMPOSE_PROJECT_NAME}".docker"
   fi
 
   if grep -q -P "^\s*(?!${LOOPBACK_IP})([0-9]{1,3}[\.]){3}[0-9]{1,3}\s+${DOMAIN}" "$TMPHOSTSFILE"; then
