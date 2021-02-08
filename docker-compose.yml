@@ -19,6 +19,7 @@ services:
       - ${HOSTS_FILE}:/tmp/hostsfile
     ports:
       - "${LOOPBACK_IP}:80:80"
+      - "${EXTERNAL_IP:-127.255.255.254}:80:80"
     depends_on:
       - mariadb
 

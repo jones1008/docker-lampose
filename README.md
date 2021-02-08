@@ -102,10 +102,20 @@ npm <any-npm-command>
 
 
 ### 8. Open Application
+#### Local
 To open the application frontend open `http://<DOMAIN>` in your browser.
 
-You can configure your `DOMAIN` in `.env` file. Make sure to restart the containers after changing it.
+You can configure your `DOMAIN` in `.env` file. Make sure to restart the containers after changing it:
+```dotenv
+DOMAIN=test.local
+```
 
+#### On the network
+If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` to the IP your computer has on the corresponding network interface:
+```dotenv
+EXTERNAL_IP=192.168.178.54
+```
+After you restarted your container, the application will be available at `http://192.168.178.54` on the network you are connected to.
 
 ### 9. xdebug
 xdebug is **installed and enabled by default**.
@@ -250,5 +260,5 @@ docker exec -it <container-name> /bin/sh
 * [x] fix startup.sh output when DOMAIN is undefined
 * [x] support for multiple npm/composer install directories
 * [x] easier mariadb connection setup
-* [ ] access from another device in the network
+* [x] access from another device in the network
 * [ ] setup for https connections (sgv project?)
