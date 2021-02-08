@@ -25,10 +25,11 @@ services:
   mariadb:
     image: jbergstroem/mariadb-alpine:10.4.15  # alpine image is a lot smaller than official mariadb image
     container_name: mariadb-${COMPOSE_PROJECT_NAME}
+    hostname: ${DOMAIN}
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - ./_docker/mariadb:/docker-entrypoint-initdb.d
       - ./_docker/mariadb/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
-      - "${MARIADB_PORT}:3306"
+      - "${LOOPBACK_IP}:3306:3306"

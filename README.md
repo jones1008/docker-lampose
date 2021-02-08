@@ -42,10 +42,6 @@ Set a password for all your databases of this project in the `.env` file:
 ```dotenv
 MYSQL_ROOT_PASSWORD=password
 ```
-Set a free port where your MariaDB Server will be available in the `.env` file. Ideally this is a port that is not used by another docker container:
-```dotenv
-MARIADB_PORT=3307
-```
 #### Import at initial startup:
 To import a database at **initial** docker startup move a `.sql` file to `./_docker/mariadb/sql`
 
@@ -85,25 +81,15 @@ The first time executing this takes a few minutes.
 > **Tip**: The Dashboard of Docker Desktop can be quite useful to manage your containers.
 
 
-### 6. Connect to database
-#### Application config
-To connect your **application** to the database use the following parameters:
-- host: name of MariaDB docker container `mariadb-<COMPOSE_PROJECT_NAME>`
-    - `COMPOSE_PROJECT_NAME` is defined in `.env` file
-- database: specified with the filename of the imported `.sql` file
+### 6. Connect to database (client or application)
+You can connect to the database from inside (database config of your application) and outside of docker (for example [DBeaver](https://dbeaver.io/)) with the following credentials:
+- host: the `DOMAIN` you specified in your `.env` file
+- port: `3306`
 - user: `root`
 - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
-  
-#### Connect from client
-You can connect to the database from any client outside of docker (for example [DBeaver](https://dbeaver.io/)) on:
-- host: `localhost`
-- port: can be configured in `.env` file (default `3307`).  Make sure to restart the containers after changing it.
-```dotenv
-MARIADB_PORT=3307
-```
 
 
-### 7. Composer and NPM install
+### 7. Composer and npm install
 `composer install` and `npm install` is automatically executed at container startup if configured. 
 
 If you want to manually execute another `composer` or `npm` command execute it in the container: 
@@ -263,4 +249,6 @@ docker exec -it <container-name> /bin/sh
 * [x] make npm and composer available in main container
 * [x] fix startup.sh output when DOMAIN is undefined
 * [x] support for multiple npm/composer install directories
+* [x] easier mariadb connection setup
+* [ ] access from another device in the network
 * [ ] setup for https connections (sgv project?)
