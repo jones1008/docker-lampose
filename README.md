@@ -23,7 +23,6 @@ Set a custom domain your application will be available at:
 ```dotenv
 DOMAIN=test.docker
 ```
-If `DOMAIN` is not set this will be set to `<COMPOSE_PROJECT_NAME>.docker`.
 ___
 Set the absolute path to your `hosts` file on your OS:
 ```dotenv
@@ -43,7 +42,7 @@ Set a password for all your databases of this project in the `.env` file:
 MYSQL_ROOT_PASSWORD=password
 ```
 #### Import at initial startup:
-To import a database at **initial** docker startup move a `.sql` file to `./_docker/mariadb/sql`
+To import a database at **initial** docker startup move a `.sql` file to `./_docker/db/sql`
 
 At initial startup it will create a new database for each `.sql` file in this directory named after that file and import the `.sql` file.
 
@@ -109,6 +108,8 @@ You can configure your `DOMAIN` in `.env` file. Make sure to restart the contain
 ```dotenv
 DOMAIN=test.local
 ```
+#### https
+The application is also available at `https://<DOMAIN>` per default.
 
 #### On the network
 If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` to the IP your computer has on the corresponding network interface:
@@ -185,7 +186,7 @@ To edit any `php.ini` config, just add another `.ini` file to `_docker/web/addit
 
 
 ### 2. Database configuration
-If you need to configure some database parameters (for example `innodb_file_format`), you can do that in the `_docker/mariadb/my.cnf` file.
+If you need to configure some database parameters (for example `innodb_file_format`), you can do that in the `_docker/db/my.cnf` file.
 
 
 ### 3. Install Composer
@@ -261,4 +262,5 @@ docker exec -it <container-name> /bin/sh
 * [x] support for multiple npm/composer install directories
 * [x] easier mariadb connection setup
 * [x] access from another device in the network
-* [ ] setup for https connections (sgv project?)
+* [x] setup for https connections (sgv project?)
+* [ ] test WKHTMLTOPDF in application

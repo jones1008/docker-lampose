@@ -16,21 +16,23 @@ services:
       - ./:/var/www/html
       - ./_docker/web/additional-inis:/usr/local/etc/php/conf.d/additional-inis
       - ./_docker/web/sites-available:/etc/apache2/sites-available
+      - ./_docker/web/certs:/etc/apache2/ssl
       - ${HOSTS_FILE}:/tmp/hostsfile
     ports:
       - "${LOOPBACK_IP}:80:80"
+      - "${LOOPBACK_IP}:443:443"
       - "${EXTERNAL_IP:-127.255.255.254}:80:80"
     depends_on:
-      - mariadb
+      - db
 
-  mariadb:
+  db:
     image: jbergstroem/mariadb-alpine:10.4.15  # alpine image is a lot smaller than official mariadb image
-    container_name: mariadb-${COMPOSE_PROJECT_NAME}
+    container_name: db-${COMPOSE_PROJECT_NAME}
     hostname: ${DOMAIN}
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
-      - ./_docker/mariadb:/docker-entrypoint-initdb.d
-      - ./_docker/mariadb/my.cnf:/etc/my.cnf.d/my.cnf
+      - ./_docker/db:/docker-entrypoint-initdb.d
+      - ./_docker/db/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
       - "${LOOPBACK_IP}:3306:3306"

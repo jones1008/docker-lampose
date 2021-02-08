@@ -1,2 +1,2 @@
-mariadb/**/*.sql
-!mariadb/**/.gitkeep
+db/**/*.sql
+!db/**/.gitkeep

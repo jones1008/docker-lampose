@@ -4,6 +4,7 @@ WORKDIR /var/www/html
 
 # enable apache module rewrite
 RUN a2enmod rewrite
+RUN a2enmod ssl && a2ensite default-ssl
 
 # install php-extension-installer for easier install of php extensions
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
