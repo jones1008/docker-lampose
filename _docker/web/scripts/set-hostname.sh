@@ -27,7 +27,7 @@ fi
 
 if grep -q -P "^\s*${LOOPBACK_IP}\s+(?!${DOMAIN})" "$tmpHostsFile"; then
   # IP exists for other domain
-  echo "[WARN]: set-hostname.sh: entry for "${LOOPBACK_IP}" with another domain exists"
+  echo "[WARN]: set-hostname.sh: entry for "${LOOPBACK_IP}" with another domain already exists. This may lead to container hostname conflicts"
 fi
 
 if ! grep -q -P "^\s*${LOOPBACK_IP}\s+${DOMAIN}" "$tmpHostsFile"; then

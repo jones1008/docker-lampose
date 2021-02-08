@@ -6,14 +6,15 @@ if [ -z "$COMPOSE_PROJECT_NAME" ]; then
 fi
 
 if [ -z "$DOMAIN" ]; then
-  # setting DOMAIN to computed value
-  echo "[INFO]: startup.sh: setting environment variable DOMAIN to "${COMPOSE_PROJECT_NAME}".docker"
-  export DOMAIN=${COMPOSE_PROJECT_NAME}".docker"
+  echo "[ERROR]: startup.sh: required environment variable DOMAIN not set"
+  return 1
 fi
 
 
 # call set-hostname.sh
-sh ./_docker/web/scripts/set-hostname.sh
+if ! ./_docker/web/scripts/set-hostname.sh; then
+  return 1
+fi
 
 wd=$(pwd)
 

@@ -6,7 +6,7 @@ services:
       args:
         INSTALL_WKHTMLTOPDF: "false"    # change requires container rebuild
     container_name: web-${COMPOSE_PROJECT_NAME}
-    command: sh -c "./_docker/web/scripts/startup.sh"
+    command: /var/www/html/_docker/web/scripts/startup.sh
     environment:
       PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
       COMPOSER_INSTALL_PATHS: ./
@@ -19,8 +19,8 @@ services:
       - ./_docker/web/certs:/etc/apache2/ssl
       - ${HOSTS_FILE}:/tmp/hostsfile
     ports:
-      - "${LOOPBACK_IP}:80:80"
-      - "${LOOPBACK_IP}:443:443"
+      - "${LOOPBACK_IP:-127.255.255.253}:80:80"
+      - "${LOOPBACK_IP:-127.255.255.254}:443:443"
       - "${EXTERNAL_IP:-127.255.255.254}:80:80"
     depends_on:
       - db
@@ -35,4 +35,9 @@ services:
       - ./_docker/db:/docker-entrypoint-initdb.d
       - ./_docker/db/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
-      - "${LOOPBACK_IP}:3306:3306"
+      - "${LOOPBACK_IP:-127.255.255.254}:3306:3306"
+
+#  grunt:
+#    command: grunt
+#    volumes:
+#      - ./

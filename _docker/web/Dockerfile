@@ -18,11 +18,10 @@ RUN install-php-extensions mysqli       # requires php7.0 or higher
 #RUN install-php-extensions zip
 #...
 
-# copy scripts directory into container
-COPY ./scripts ./_docker/web/scripts
 
 # install correct xdebug version with script (https://xdebug.org/)
-RUN ./_docker/web/scripts/install-xdebug.sh
+COPY ./scripts/install-xdebug.sh /install-xdebug.sh
+RUN /install-xdebug.sh
 RUN docker-php-ext-enable xdebug
 
 

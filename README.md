@@ -263,4 +263,8 @@ docker exec -it <container-name> /bin/sh
 * [x] easier mariadb connection setup
 * [x] access from another device in the network
 * [x] setup for https connections (sgv project?)
-* [ ] test WKHTMLTOPDF in application
+* [ ] test WKHTMLTOPDF in application (copy db + get salt from production)
+* [ ] grunt in it's own container
+* [ ] fix database connection
+* [x] fix hosts file script?
+* [ ] dockerize IFAA (Genesis World, ERP, Shop)
