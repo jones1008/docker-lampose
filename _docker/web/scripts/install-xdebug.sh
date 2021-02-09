@@ -10,18 +10,18 @@ gte() {
     [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$1" ]
 }
 
-if gte 7.2 $phpFullVersion; then
+if gte 7.2 "$phpFullVersion"; then
   echo "installing xdebug 3.0.2"
   pecl install xdebug-3.0.2
-elif gte 7.0 $phpFullVersion; then
+elif gte 7.0 "$phpFullVersion"; then
   echo "installing xdebug 2.7.2"
   pecl install xdebug-2.7.2
-elif gte 5.6 $phpFullVersion; then
+elif gte 5.6 "$phpFullVersion"; then
   echo "installing xdebug 2.5.5"
   pecl install xdebug-2.5.5
-elif gte 5.4 $phpFullVersion; then
+elif gte 5.4 "$phpFullVersion"; then
   echo "installing xdebug 2.4.1"
   pecl install xdebug-2.4.1
 else
-  echo "[ERROR] while trying to install xdebug: invalid or too old version number: "$phpFullVersion
+  echo "[ERROR] while trying to install xdebug: invalid or too old version number: $phpFullVersion"
 fi

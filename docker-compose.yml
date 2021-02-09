@@ -19,14 +19,14 @@ services:
       - ./_docker/web/certs:/etc/apache2/ssl
       - ${HOSTS_FILE}:/tmp/hostsfile
     ports:
-      - "${LOOPBACK_IP:-127.255.255.253}:80:80"
+      - "${LOOPBACK_IP:-127.255.255.254}:80:80"
       - "${LOOPBACK_IP:-127.255.255.254}:443:443"
-      - "${EXTERNAL_IP:-127.255.255.254}:80:80"
+      - "${EXTERNAL_IP:-127.255.255.253}:80:80"
     depends_on:
       - db
 
   db:
-    image: jbergstroem/mariadb-alpine:10.4.15  # alpine image is a lot smaller than official mariadb image
+    image: jbergstroem/mariadb-alpine:10.4.17  # alpine image is a lot smaller than official mariadb image
     container_name: db-${COMPOSE_PROJECT_NAME}
     hostname: ${DOMAIN}
     environment:
@@ -35,9 +35,4 @@ services:
       - ./_docker/db:/docker-entrypoint-initdb.d
       - ./_docker/db/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
-      - "${LOOPBACK_IP:-127.255.255.254}:3306:3306"
-
-#  grunt:
-#    command: grunt
-#    volumes:
-#      - ./
+      - "${LOOPBACK_IP:-127.255.255.254}:3307:3306"

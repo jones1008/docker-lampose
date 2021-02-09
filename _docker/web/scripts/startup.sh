@@ -20,25 +20,26 @@ wd=$(pwd)
 
 # run composer install for each specified path
 if [ -n "$COMPOSER_INSTALL_PATHS" ]; then
-  for path in $(echo $COMPOSER_INSTALL_PATHS | tr ':' ' '); do
-    cd $wd
-    cd $path
-    echo "[INFO]: COMPOSER: executing composer install in "$path
+  for path in $(echo "$COMPOSER_INSTALL_PATHS" | tr ':' ' '); do
+    cd "$wd"
+    cd "$path"
+    echo "[INFO]: COMPOSER: executing composer install in $path"
     composer install
   done
 fi
 
 # run npm install for each specified path
 if [ -n "$NPM_INSTALL_PATHS" ]; then
-  for path in $(echo $NPM_INSTALL_PATHS | tr ':' ' '); do
-    cd $wd
-    cd $path
-    echo "[INFO]: NPM: executing npm install in "$path
+  for path in $(echo "$NPM_INSTALL_PATHS" | tr ':' ' '); do
+    cd "$wd"
+    cd "$path"
+    echo "[INFO]: NPM: executing npm install in $path"
     npm install --no-update-notifier
   done
 fi
 
 
 # start application
-cd $wd
-sleep 1 && echo application started at http://${DOMAIN} & exec 'apache2-foreground'
+# TODO: started at http://192.15.34.5 + https?
+cd "$wd"
+sleep 1 && echo "application started at http://$DOMAIN" & exec 'apache2-foreground'

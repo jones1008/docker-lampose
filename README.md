@@ -86,6 +86,7 @@ You can connect to the database from inside (database config of your application
 - port: `3306`
 - user: `root`
 - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
+- database name: specified with the filename of your imported `.sql` file
 
 
 ### 7. Composer and npm install
@@ -263,8 +264,16 @@ docker exec -it <container-name> /bin/sh
 * [x] easier mariadb connection setup
 * [x] access from another device in the network
 * [x] setup for https connections (sgv project?)
+* [x] fix database connection
+* [x] fix hosts file script
 * [ ] test WKHTMLTOPDF in application (copy db + get salt from production)
 * [ ] grunt in it's own container
-* [ ] fix database connection
-* [x] fix hosts file script?
+* [ ] get rid of apache2-foreground ssl:warnings
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
+* [ ] hostsfile script error:
+```
+###127.55.0.3 test.docker
+##127.55.0.4 test.docker
+#127.55.0.5 test.docker
+```
+* [ ] `docker-compose down -v` needed, because volume initialized in jbergstroem/mariadb Dockerfile?
