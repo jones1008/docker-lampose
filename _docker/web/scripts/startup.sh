@@ -1,19 +1,23 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ -z "$COMPOSE_PROJECT_NAME" ]; then
   echo "[ERROR]: startup.sh: required environment variable COMPOSE_PROJECT_NAME not set"
-  return 1
+  exit 1
 fi
 
 if [ -z "$DOMAIN" ]; then
   echo "[ERROR]: startup.sh: required environment variable DOMAIN not set"
-  return 1
+  exit 1
 fi
 
+# call build-config.sh
+if ! ./_docker/web/scripts/replace-templates.sh; then
+  exit 1
+fi
 
 # call set-hostname.sh
 if ! ./_docker/web/scripts/set-hostname.sh; then
-  return 1
+  exit 1
 fi
 
 wd=$(pwd)

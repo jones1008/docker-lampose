@@ -1,14 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 # this script adds entries to the hosts file
 
 if [ -z "$LOOPBACK_IP" ]; then
   echo "[ERROR]: set-hostname.sh: required environment variable LOOPBACK_IP is not set"
-  return 1
+  exit 1
 fi
 
 if [ -z "$DOMAIN" ]; then
   echo "[ERROR]: set-hostname.sh: required environment variable DOMAIN is not set"
-  return 1
+  exit 1
 fi
 
 hostsFile=/tmp/hostsfile

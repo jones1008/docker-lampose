@@ -12,21 +12,28 @@ The current directory will be available in the `/var/www/html` directory of the 
 The `db` container runs Alpine Linux (very small Linux).
 It holds the database server and is therefore responsible for managing database connection etc. 
 
+## Prefix Notes
+### Git submodules
+If your application has **git submodules** make sure to pull them first. 
+If you have a `.gitmodules` file in your root directory you will probably want to do this. 
+```shell
+git submodule update --recursive
+```
 
 # Configure and run the dockerized application:
 
-### 1. Create `.env` file
-copy `.env.sample` to `.env`
+### 1. Create `local.env.sample` file
+copy `local.env.sample` to `local.env.sample`
 
 ### 2. Set some important variables
-Set your project name in the `.env` file like so:
+Set your project name in the `local.env.sample` file like so:
 ```dotenv
 COMPOSE_PROJECT_NAME=my-project
 ```
 This prevents container name collisions in the future.
 ___
 
-Set an **unused loopback IP** from the IP range `127.0.0.0/8` in your `.env` file. 
+Set an **unused loopback IP** from the IP range `127.0.0.0/8` in your `local.env.sample` file. 
 Unused means the loopback IP does not appear in your `hosts` file. For example:
 ```dotenv
 LOOPBACK_IP=127.55.0.1
@@ -50,19 +57,17 @@ This is needed to automatically set your domain in your hosts file.
 ![_docker/docs/writable-hosts-file.png](_docker/docs/writable-hosts-file.png)
 
 ### 3. Database
-#### Config:
-[comment]: <> (TODO: Passwort überhaupt notwendig?)
-Set a password for all your databases of this project in the `.env` file:
-```dotenv
-MYSQL_ROOT_PASSWORD=password
-```
 #### Import at initial startup:
 To import a database at **initial** docker startup move a `.sql` file to `./_docker/db/sql`
 
-> An `.sql` file named `test.sql` will import this file into a database named `test`. 
-> So name your `.sql` file how you want your database to be named. 
+After that map this file to a database name of your choice in your `local.env.sample` file:
+```dotenv
+DATABASE_NAME_MAIN=test_name
+DATABASE_FILE_MAIN=test.sql
+```
+This will import the file `./_docker/db/sql/test.sql` in the newly created database `test_name` within the `db` container.
 
-To import multiple databases, just place multiple `.sql` files in this directory.
+To import multiple databases, add another `.sql` file and add more mapping variables with another suffix than `_MAIN` like above.
 
 **Important**: If the container is already running, stop it, tear it down and start it again to trigger the import:
 ```shell
@@ -92,10 +97,10 @@ The first time executing this takes a few minutes.
 
 ### 6. Connect to database (client or application)
 You can connect to the database from inside (database config of your application) and outside of docker (for example [DBeaver](https://dbeaver.io/)) with the following credentials:
-- host: the `DOMAIN` you specified in your `.env` file
+- host: the `DOMAIN` you specified in your `local.env.sample` file
 - port: `3306`
 - user: `root`
-- password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
+- password: specified with `MYSQL_ROOT_PASSWORD` in `local.env.sample` file
 - database name: specified with the basename of your imported `.sql` file (e.g.: file `test.sql` -> database name `test`)
 
 
@@ -103,7 +108,7 @@ You can connect to the database from inside (database config of your application
 #### Local
 To open the application frontend open `http://<DOMAIN>` in your browser.
 
-You can configure your `DOMAIN` in `.env` file. Make sure to restart the containers after changing it:
+You can configure your `DOMAIN` in `local.env.sample` file. Make sure to restart the containers after changing it:
 ```dotenv
 DOMAIN=test.local
 ```
@@ -111,7 +116,7 @@ DOMAIN=test.local
 The application is also available at `https://<DOMAIN>` per default.
 
 #### On the network
-If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` in your `.env` 
+If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` in your `local.env.sample` 
 file to the IP your computer has on the corresponding network interface. **For example**:
 ```dotenv
 EXTERNAL_IP=192.168.178.54
@@ -136,11 +141,7 @@ xdebug.mode=debug
 After that you need to restart the container.
 
 
-### 9. Configure WKHTMLTOPDF
-If installed the wkhtmltopdf binary will be available **in** the container under `/usr/bin/wkhtmltopdf`, so set this path in your application settings.
-
-
-### 10. Composer, npm and other commands
+### 9. Composer, npm and other commands
 Composer and npm is preinsalled in the `web` container.
 
 `composer install` and `npm install` is automatically executed at container startup if configured.
@@ -152,7 +153,7 @@ composer <any-composer-command>
 npm <any-npm-command>
 <any-other-command>
 ```
-`COMPOSE_PROJECT_NAME` is defined in your `.env` file
+`COMPOSE_PROJECT_NAME` is defined in your `local.env.sample` file
 
 
 
@@ -213,6 +214,59 @@ DocumentRoot /var/www/html/webroot
 If you need to configure some database parameters (for example `innodb_file_format`), you can do that in the `_docker/db/my.cnf` file.
 
 
+### Custom application configuration files
+If you have a git ignored file (for example a `database_config.php`) in your application that normally needs to be edited,
+you can define a template file, that reduces further configuration of the Docker user.
+
+At container startup all environment variable occurrences within this file will be set to the corresponding value and
+copied to the defined location.
+
+To do this, first set a file mapping in your `docker-compose.yml` as an environment variable with the prefix `TEMPLATE_`:
+```yaml
+services:
+  web:
+    environment:
+      TEMPLATE_DB_CONFIG: "database_config.php:./path/to/application/database_config.php"
+```
+In `_docker/web/templates/` define your configuration template file like this (in this case `database_config.php`):
+```php
+<?php
+return [
+    "database" => [
+        "host" => '${DOMAIN}',
+        "user" => '${DATABASE_USER_MAIN}',
+        "password" => '${DATABASE_PASS_MAIN}',
+        "database_name" => '${DATABASE_NAME_MAIN}'
+    ],
+    'wkhtmltopdfBinary' => '${WKHTMLTOPDF_BINARY}'
+];
+```
+The variables `DATABASE_USER_MAIN` and `DATABASE_PASS_MAIN` should be set in the `public.env`.
+If you have more databases set these variables with a different suffix than `_MAIN`:
+```dotenv
+DATABASE_USER_MAIN="some_user"
+DATABASE_PASS_MAIN="s3cr3tP4ssw0rd"
+DATABASE_USER_SOMEOTHERSUFFIX="another_user"
+DATABASE_PASS_SOMEOTHERSUFFIX="sauce"
+```
+
+In this case the literal environment variables in the file `_docker/web/templates/database_config.php` will be replaced 
+with the corresponding environment value and then the file will be copied to `./path/to/application/database_config.php`.
+
+The resulting file `./path/to/application/database_config.php` can be for example:
+```php
+<?php
+return [
+    "database" => [
+        "host" => 'test.docker',
+        "user" => 'some_user',
+        "password" => 's3cr3tP4ssw0rd',
+        "database_name" => 'some_db_name' 
+    ],
+    "wkhtmltopdfBinary" => '/usr/bin/wkhtmltopdf'
+];
+```
+
 ### 4. Install Composer
 Composer is installed per default, and it runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
 ```yaml
@@ -255,6 +309,8 @@ services:
 ```
 After that you have to rebuild the container (see Note 1)
 
+The binary path is stored in the environment variable `WKHTMLTOPDF_BINARY` available in the `web` container
+
 
 ## Troubleshoot
 #### bash into container:
@@ -291,6 +347,8 @@ docker exec -it <container-name> /bin/sh
 * [x] fix hosts file script
 * [x] add output `started at http://192.15.34.5 + https?` to `startup.sh`
 * [x] get rid of apache2-foreground ssl:warnings
+* [x] automate config files more - "template"-language, that dynamically replaces ${VARIABLES} of config files and maps them with volumes
+* [ ] replace db import script with startup-script triggered via command
 * [ ] test WKHTMLTOPDF in application (copy db + get salt from production)
 * [ ] install grunt into container
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
@@ -301,5 +359,3 @@ docker exec -it <container-name> /bin/sh
 #127.55.0.5 test.docker
 ```
 * [ ] npm and composer install with wildcard (recursive) directory syntax (https://github.com/wikimedia/composer-merge-plugin -> https://github.com/wikimedia/composer-merge-plugin/pull/189 ?)
-* [ ] automate config files more - "template"-language, that dynamically replaces ${VARIABLES} of config files and maps them with volumes
-* [ ] bti-brandschutz: git submodule für bti-brandschutz-templates festelegen

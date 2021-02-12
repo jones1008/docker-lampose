@@ -9,9 +9,13 @@ services:
     command: /var/www/html/_docker/web/scripts/startup.sh
     environment:
       PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
+      TEMPLATE_CONFIG: "database_config.php:./application/config/database_config.php"
+      WKHTMLTOPDF_BINARY: "/usr/bin/wkhtmltopdf"
       COMPOSER_INSTALL_PATHS: ./
-#      NPM_INSTALL_PATHS: ./
-    env_file: .env
+      #NPM_INSTALL_PATHS: ./
+    env_file:
+      - .env
+      - public.env
     volumes:
       - ./:/var/www/html
       - ./_docker/web/additional-inis:/usr/local/etc/php/conf.d/additional-inis
@@ -26,13 +30,16 @@ services:
       - db
 
   db:
-    image: jbergstroem/mariadb-alpine:10.4.17  # alpine image is a lot smaller than official mariadb image
+    build: _docker/db
     container_name: db-${COMPOSE_PROJECT_NAME}
     hostname: ${DOMAIN}
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+    env_file:
+      - .env
+      - public.env
     volumes:
       - ./_docker/db:/docker-entrypoint-initdb.d
       - ./_docker/db/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
-      - "${LOOPBACK_IP:-127.255.255.254}:3307:3306"
+      - "${LOOPBACK_IP:-127.255.255.254}:3306:3306"
