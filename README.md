@@ -141,8 +141,8 @@ xdebug.mode=debug
 After that you need to restart the container.
 
 
-### 9. Composer, npm and other commands
-Composer and npm is preinsalled in the `web` container.
+### 9. Composer, npm, grunt and other commands
+Composer, npm and grunt is pre-installed in the `web` container.
 
 `composer install` and `npm install` is automatically executed at container startup if configured.
 
@@ -151,6 +151,7 @@ If you want to manually execute another command, it is best to execute it **in**
 docker exec -it web-<COMPOSE_PROJECT_NAME> /bin/bash  # go into container
 composer <any-composer-command>
 npm <any-npm-command>
+grunt
 <any-other-command>
 ```
 `COMPOSE_PROJECT_NAME` is defined in your `local.env.sample` file
@@ -318,10 +319,6 @@ To troubleshoot anything inside a container, go into the container with:
 ```shell
 docker exec -it <container-name> /bin/bash
 ```
-If this doesn't work try this:
-```shell
-docker exec -it <container-name> /bin/sh
-```
 
 
 # Roadmap
@@ -348,9 +345,9 @@ docker exec -it <container-name> /bin/sh
 * [x] add output `started at http://192.15.34.5 + https?` to `startup.sh`
 * [x] get rid of apache2-foreground ssl:warnings
 * [x] automate config files more - "template"-language, that dynamically replaces ${VARIABLES} of config files and maps them with volumes
-* [ ] replace db import script with startup-script triggered via command
+* [x] install grunt into container
+* [ ] npm and composer install with wildcard (recursive) directory syntax (https://github.com/wikimedia/composer-merge-plugin -> https://github.com/wikimedia/composer-merge-plugin/pull/189 ?)
 * [ ] test WKHTMLTOPDF in application (copy db + get salt from production)
-* [ ] install grunt into container
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
 * [ ] hostsfile script error:
 ```
@@ -358,4 +355,3 @@ docker exec -it <container-name> /bin/sh
 ##127.55.0.4 test.docker
 #127.55.0.5 test.docker
 ```
-* [ ] npm and composer install with wildcard (recursive) directory syntax (https://github.com/wikimedia/composer-merge-plugin -> https://github.com/wikimedia/composer-merge-plugin/pull/189 ?)

@@ -35,6 +35,9 @@ RUN apt-get update && apt-get install -y curl
 # install npm
 RUN curl -sL https://deb.nodesource.com/setup_lts.x | bash - && apt-get install -y nodejs
 
+# install grunt-cli
+RUN npm install -g grunt-cli
+
 # install wkhtmltopdf (https://wkhtmltopdf.org/)
 ARG INSTALL_WKHTMLTOPDF="false"
 RUN if [ "$INSTALL_WKHTMLTOPDF" = "true" ]; then \
