@@ -10,6 +10,7 @@ RUN a2enmod ssl && a2ensite default-ssl
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
 ### common PHP extensions (add PHP extensions here as explained in README.md)
+# see all available PHP extensions at https://github.com/mlocati/docker-php-extension-installer#supported-php-extensions
 RUN install-php-extensions opcache      # for 2x better performance
 RUN install-php-extensions pdo_mysql    # for mysqli connections
 RUN install-php-extensions mysqli       # requires php7.0 or higher
@@ -26,7 +27,7 @@ RUN docker-php-ext-enable xdebug
 
 
 # install composer
-RUN install-php-extensions @composer
+RUN install-php-extensions @composer && apt-get update && apt-get install -y unzip git
 
 # prepare other installations
 RUN apt-get update && apt-get install -y curl

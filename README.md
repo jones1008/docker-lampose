@@ -1,10 +1,22 @@
 # Docker Development Setup
 
+# Intro: What is this Docker setup?
+
+This Docker development setup is mainly setup with the `docker-compose.yml` file. 
+It creates two containers at startup (`web` and `db`).
+
+The `web` container runs Debian (Linux) and is responsible for the web application.
+The current directory will be available in the `/var/www/html` directory of the web application.
+
+
+The `db` container runs Alpine Linux (very small Linux).
+It holds the database server and is therefore responsible for managing database connection etc. 
+
+
 # Configure and run the dockerized application:
 
 ### 1. Create `.env` file
-- copy `.env.sample` to `.env`
-
+copy `.env.sample` to `.env`
 
 ### 2. Set some important variables
 Set your project name in the `.env` file like so:
@@ -13,13 +25,15 @@ COMPOSE_PROJECT_NAME=my-project
 ```
 This prevents container name collisions in the future.
 ___
-Set an **unused loopback IP** from the IP range `127.0.0.0/8` in your `.env` file. Unused means the IP does not appear in your `hosts` file
+
+Set an **unused loopback IP** from the IP range `127.0.0.0/8` in your `.env` file. 
+Unused means the loopback IP does not appear in your `hosts` file. For example:
 ```dotenv
 LOOPBACK_IP=127.55.0.1
 ```
-This is needed to configure a custom domain your application will be available at.
+This is needed to configure a custom domain where your application will be available at.
 ___
-Set a custom domain your application will be available at:
+Set a custom domain where your application will be available at:
 ```dotenv
 DOMAIN=test.docker
 ```
@@ -37,6 +51,7 @@ This is needed to automatically set your domain in your hosts file.
 
 ### 3. Database
 #### Config:
+[comment]: <> (TODO: Passwort überhaupt notwendig?)
 Set a password for all your databases of this project in the `.env` file:
 ```dotenv
 MYSQL_ROOT_PASSWORD=password
@@ -44,23 +59,18 @@ MYSQL_ROOT_PASSWORD=password
 #### Import at initial startup:
 To import a database at **initial** docker startup move a `.sql` file to `./_docker/db/sql`
 
-At initial startup it will create a new database for each `.sql` file in this directory named after that file and import the `.sql` file.
+> An `.sql` file named `test.sql` will import this file into a database named `test`. 
+> So name your `.sql` file how you want your database to be named. 
 
-If the container is already running, stop it, tear it down and start it again to trigger the import:
+To import multiple databases, just place multiple `.sql` files in this directory.
+
+**Important**: If the container is already running, stop it, tear it down and start it again to trigger the import:
 ```shell
 docker-compose down
 docker-compose up
 ```
 
-### 4. Webserver Setup
-If you need to set the root directory of your web application other than `./` (for example `/webroot`) set it in `_docker/web/sites-available/000-default.conf`:
-```apacheconf
-# ...
-DocumentRoot /var/www/html/webroot
-```
-After that you need to restart the container.
-
-### 5. Download and configure Docker Desktop
+### 4. Download and configure Docker Desktop
 If you are on Windows or Mac download and install [Docker Desktop](https://www.docker.com/get-started) if you haven't already.
 
 If you are on Winodws make sure to **disable the WSL 2 based engine** and use the Hyper-V backend instead as this can lead to performance issues with docker volumes (10x faster).
@@ -68,8 +78,8 @@ If you are on Winodws make sure to **disable the WSL 2 based engine** and use th
 This can be done in the Docker Desktop Dashboard:
 ![_docker/docs/hyper-v.png](_docker/docs/hyper-v.png)
 
-### 6. Start your containers
-After configuration you can start your containers with:
+### 5. Start your containers
+After configuration you can start your containers with executing the following command **in the root directory of your project**:
 ```shell
 docker-compose up
 ```
@@ -86,22 +96,10 @@ You can connect to the database from inside (database config of your application
 - port: `3306`
 - user: `root`
 - password: specified with `MYSQL_ROOT_PASSWORD` in `.env` file
-- database name: specified with the filename of your imported `.sql` file
+- database name: specified with the basename of your imported `.sql` file (e.g.: file `test.sql` -> database name `test`)
 
 
-### 7. Composer and npm install
-`composer install` and `npm install` is automatically executed at container startup if configured. 
-
-If you want to manually execute another `composer` or `npm` command execute it in the container: 
-```bash
-docker exec -it web-<COMPOSE_PROJECT_NAME> /bin/bash
-composer <any-composer-command>
-npm <any-npm-command>
-```
-`COMPOSE_PROJECT_NAME` is defined in your `.env` file
-
-
-### 8. Open Application
+### 7. Open Application
 #### Local
 To open the application frontend open `http://<DOMAIN>` in your browser.
 
@@ -113,13 +111,14 @@ DOMAIN=test.local
 The application is also available at `https://<DOMAIN>` per default.
 
 #### On the network
-If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` to the IP your computer has on the corresponding network interface:
+If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` in your `.env` 
+file to the IP your computer has on the corresponding network interface. **For example**:
 ```dotenv
 EXTERNAL_IP=192.168.178.54
 ```
 After you restarted your container, the application will be available at `http://192.168.178.54` on the network you are connected to.
 
-### 9. xdebug
+### 8. xdebug
 xdebug is **installed and enabled by default**.
 
 To disable xdebug with PHP version `< 7.2` change the file `./_docker/web/additional-inis/xdebug.ini` to:
@@ -137,8 +136,24 @@ xdebug.mode=debug
 After that you need to restart the container.
 
 
-### 10. Configure WKHTMLTOPDF:
-If installed the wkhtmltopdf binary will be available in the container under `/usr/bin/wkhtmltopdf`, so set this path in your application settings.
+### 9. Configure WKHTMLTOPDF
+If installed the wkhtmltopdf binary will be available **in** the container under `/usr/bin/wkhtmltopdf`, so set this path in your application settings.
+
+
+### 10. Composer, npm and other commands
+Composer and npm is preinsalled in the `web` container.
+
+`composer install` and `npm install` is automatically executed at container startup if configured.
+
+If you want to manually execute another command, it is best to execute it **in** the container:
+```bash
+docker exec -it web-<COMPOSE_PROJECT_NAME> /bin/bash  # go into container
+composer <any-composer-command>
+npm <any-npm-command>
+<any-other-command>
+```
+`COMPOSE_PROJECT_NAME` is defined in your `.env` file
+
 
 
 
@@ -186,11 +201,19 @@ More information on https://hub.docker.com/_/php/ at *How to install more PHP ex
 To edit any `php.ini` config, just add another `.ini` file to `_docker/web/additional-inis/`
 
 
-### 2. Database configuration
+### 2. Webserver Setup
+If you need to set the root directory of your web application other than `./` 
+(for example `/webroot`) set it in `_docker/web/sites-available/000-default.conf`:
+```apacheconf
+# ...
+DocumentRoot /var/www/html/webroot
+```
+
+### 3. Database configuration
 If you need to configure some database parameters (for example `innodb_file_format`), you can do that in the `_docker/db/my.cnf` file.
 
 
-### 3. Install Composer
+### 4. Install Composer
 Composer is installed per default, and it runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
 ```yaml
 services:
@@ -205,7 +228,7 @@ COMPOSER_INSTALL_PATHS: ./path:./another/path
 ```
 
 
-### 4. Run `npm install` at startup
+### 5. Run `npm install` at startup
 Node.js and `npm` is installed per default, and it automatically runs `npm install` in the directory you specified with:  
 ```yaml
 services:
@@ -220,7 +243,7 @@ NPM_INSTALL_PATHS: ./path:./another/path
 ```
 
 
-### 5. install wkhtmltopdf
+### 6. install wkhtmltopdf
 If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
 ```yaml
 services:
@@ -266,9 +289,10 @@ docker exec -it <container-name> /bin/sh
 * [x] setup for https connections (sgv project?)
 * [x] fix database connection
 * [x] fix hosts file script
+* [x] add output `started at http://192.15.34.5 + https?` to `startup.sh`
+* [x] get rid of apache2-foreground ssl:warnings
 * [ ] test WKHTMLTOPDF in application (copy db + get salt from production)
-* [ ] grunt in it's own container
-* [ ] get rid of apache2-foreground ssl:warnings
+* [ ] install grunt into container
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
 * [ ] hostsfile script error:
 ```
@@ -276,4 +300,6 @@ docker exec -it <container-name> /bin/sh
 ##127.55.0.4 test.docker
 #127.55.0.5 test.docker
 ```
-* [ ] `docker-compose down -v` needed, because volume initialized in jbergstroem/mariadb Dockerfile?
+* [ ] npm and composer install with wildcard (recursive) directory syntax (https://github.com/wikimedia/composer-merge-plugin -> https://github.com/wikimedia/composer-merge-plugin/pull/189 ?)
+* [ ] automate config files more - "template"-language, that dynamically replaces ${VARIABLES} of config files and maps them with volumes
+* [ ] bti-brandschutz: git submodule für bti-brandschutz-templates festelegen

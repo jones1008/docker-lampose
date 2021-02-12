@@ -40,6 +40,12 @@ fi
 
 
 # start application
-# TODO: started at http://192.15.34.5 + https?
 cd "$wd"
-sleep 1 && echo "application started at http://$DOMAIN" & exec 'apache2-foreground'
+
+sleep 1 && \
+echo "application started at https://$DOMAIN" && \
+if [ -n "$EXTERNAL_IP" ]; then \
+  echo "application started at http://$EXTERNAL_IP"; \
+fi & \
+
+exec 'apache2-foreground'
