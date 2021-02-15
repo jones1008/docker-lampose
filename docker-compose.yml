@@ -9,7 +9,7 @@ services:
     command: /var/www/html/_docker/web/scripts/startup.sh
     environment:
       PHP_INI_SCAN_DIR: ":/usr/local/etc/php/conf.d/additional-inis"
-      #TEMPLATE_CONFIG: "database_config.php:./application/config/database_config.php"
+      TEMPLATE_CONFIG: "database_config.php:./application/config/database_config.php"
       WKHTMLTOPDF_BINARY: "/usr/bin/wkhtmltopdf"
       COMPOSER_INSTALL_PATHS: ./
       #NPM_INSTALL_PATHS: ./

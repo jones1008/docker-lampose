@@ -253,6 +253,12 @@ return [
     'wkhtmltopdfBinary' => '${WKHTMLTOPDF_BINARY}'
 ];
 ```
+This also supports the bash default syntax with `:-` between variable name and default value:
+```bash
+${DOMAIN:-test.local}
+```
+If the environment variable `DOMAIN` is not set, this will default to `test.local`
+
 The variables `DATABASE_USER_MAIN` and `DATABASE_PASS_MAIN` should be set in the `public.env`.
 If you have more databases set these variables with a different suffix than `_MAIN`:
 ```dotenv
@@ -359,5 +365,6 @@ docker exec -it <container-name> /bin/bash
 * [x] install grunt into container
 * [x] error when database name has - in name
 * [x] 3307 as default port
+* [x] replace-templates.sh: support for default values (syntax: `${WEB_PORT:-80}`)
 * [ ] test WKHTMLTOPDF in application (bti-brandschutz error: companies association is not defined in Projects -> ask Robin)
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
