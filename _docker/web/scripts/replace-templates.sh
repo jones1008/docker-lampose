@@ -28,8 +28,12 @@ for templateVarName in "${!TEMPLATE@}"; do
 
     # write replaced content to destination file if content is different
     if [ "$sourceFileContent" != "$destinationFileContent" ]; then
-      echo "$destinationFileContent" > "$destinationFile"
-      echo "[INFO]: replace-templates.sh: replaced some content of $destinationFile with environment variables"
+      destinationFileContentBefore=$(<"$destinationFile")
+      # only if destination file would be different to before
+      if [ "$destinationFileContent" != "$destinationFileContentBefore" ]; then
+        echo "$destinationFileContent" > "$destinationFile"
+        echo "[INFO]: replace-templates.sh: replaced some content of $destinationFile with environment variables"
+      fi
     fi
   else
     echo "[ERROR]: replace-templates.sh: could not find template file '$sourceFile'"
