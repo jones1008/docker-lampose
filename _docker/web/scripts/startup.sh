@@ -47,7 +47,7 @@ fi
 cd "$wd"
 
 sleep 1 && \
-echo "application started at https://$DOMAIN" && \
+echo "application started with self-signed certificate at https://$DOMAIN and without at http://$DOMAIN" && \
 if [ -n "$EXTERNAL_IP" ]; then \
   echo "application started at http://$EXTERNAL_IP"; \
 fi & \

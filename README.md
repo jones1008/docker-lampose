@@ -98,9 +98,9 @@ The first time executing this takes a few minutes.
 ### 6. Connect to database (client)
 You can connect to the database (for example [DBeaver](https://dbeaver.io/)) with the following credentials:
 - host: the `DOMAIN` you specified in your `.env` file
-- port: `3306`
+- port: `3307`(!!)
 - user: `root`
-- password: `root`
+- password: `root` (if not specified differently in `docker-compose.yml` with the environment variable `MYSQL_ROOT_PASSWORD` of the `db` container)
 - database name: the `DATABASE_FILE_MAIN` or `DATABASE_FILE_<OTHER_SUFFIX>` you specified in your `.env` file
 
 
@@ -346,5 +346,7 @@ docker exec -it <container-name> /bin/bash
 * [x] get rid of apache2-foreground ssl:warnings
 * [x] automate config files more - "template"-language, that dynamically replaces ${VARIABLES} of config files and maps them with volumes
 * [x] install grunt into container
+* [x] error when database name has - in name
+* [x] 3307 as default port
 * [ ] test WKHTMLTOPDF in application (bti-brandschutz error: companies association is not defined in Projects -> ask Robin)
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)

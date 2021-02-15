@@ -42,4 +42,4 @@ services:
       - ./_docker/db:/docker-entrypoint-initdb.d
       - ./_docker/db/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
-      - "${LOOPBACK_IP:-127.255.255.254}:3306:3306"
+      - "${LOOPBACK_IP:-127.255.255.254}:3307:3306"

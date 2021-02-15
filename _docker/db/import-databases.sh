@@ -26,8 +26,8 @@ for dbNameVarName in "${!DATABASE_NAME_@}"; do
   if [ -f "$sqlFile" ]; then
     echo "[INFO]: import-databases.sh: creating database '$dbName' accessible by user '$user'"
     /usr/bin/mysql -u root <<-EOF
-      CREATE DATABASE IF NOT EXISTS $dbName;
-      GRANT ALL PRIVILEGES ON $dbName.* TO '$user'@'%' IDENTIFIED BY '$password';
+      CREATE DATABASE IF NOT EXISTS \`$dbName\`;
+      GRANT ALL PRIVILEGES ON \`$dbName\`.* TO \`$user\`@'%' IDENTIFIED BY '$password';
 EOF
     echo "[INFO]: import-databases.sh: importing '$sqlFile' into database '$dbName'..."
     /usr/bin/mysql -u root "$dbName" < "./$sqlFile"
