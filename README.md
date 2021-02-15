@@ -22,18 +22,18 @@ git submodule update --recursive
 
 # Configure and run the dockerized application:
 
-### 1. Create `local.env.sample` file
-copy `local.env.sample` to `local.env.sample`
+### 1. Create `.env` file
+copy `.env.sample` to `.env`
 
 ### 2. Set some important variables
-Set your project name in the `local.env.sample` file like so:
+Set your project name in the `.env` file like so:
 ```dotenv
 COMPOSE_PROJECT_NAME=my-project
 ```
 This prevents container name collisions in the future.
 ___
 
-Set an **unused loopback IP** from the IP range `127.0.0.0/8` in your `local.env.sample` file. 
+Set an **unused loopback IP** from the IP range `127.0.0.0/8` in your `.env` file. 
 Unused means the loopback IP does not appear in your `hosts` file. For example:
 ```dotenv
 LOOPBACK_IP=127.55.0.1
@@ -60,14 +60,14 @@ This is needed to automatically set your domain in your hosts file.
 #### Import at initial startup:
 To import a database at **initial** docker startup move a `.sql` file to `./_docker/db/sql`
 
-After that map this file to a database name of your choice in your `local.env.sample` file:
+After that map this file to a database name of your choice in your `.env` file:
 ```dotenv
 DATABASE_NAME_MAIN=test_name
 DATABASE_FILE_MAIN=test.sql
 ```
-This will import the file `./_docker/db/sql/test.sql` in the newly created database `test_name` within the `db` container.
+This will import the file `./_docker/db/sql/test.sql` in the newly created database `test_name` at container startup within the `db` container.
 
-To import multiple databases, add another `.sql` file and add more mapping variables with another suffix than `_MAIN` like above.
+To import **multiple** databases, add another `.sql` file and add more mapping variables with another suffix than `_MAIN` like above.
 
 **Important**: If the container is already running, stop it, tear it down and start it again to trigger the import:
 ```shell
@@ -95,20 +95,20 @@ The first time executing this takes a few minutes.
 > **Tip**: The Dashboard of Docker Desktop can be quite useful to manage your containers.
 
 
-### 6. Connect to database (client or application)
-You can connect to the database from inside (database config of your application) and outside of docker (for example [DBeaver](https://dbeaver.io/)) with the following credentials:
-- host: the `DOMAIN` you specified in your `local.env.sample` file
+### 6. Connect to database (client)
+You can connect to the database (for example [DBeaver](https://dbeaver.io/)) with the following credentials:
+- host: the `DOMAIN` you specified in your `.env` file
 - port: `3306`
 - user: `root`
-- password: specified with `MYSQL_ROOT_PASSWORD` in `local.env.sample` file
-- database name: specified with the basename of your imported `.sql` file (e.g.: file `test.sql` -> database name `test`)
+- password: `root`
+- database name: the `DATABASE_FILE_MAIN` or `DATABASE_FILE_<OTHER_SUFFIX>` you specified in your `.env` file
 
 
 ### 7. Open Application
 #### Local
 To open the application frontend open `http://<DOMAIN>` in your browser.
 
-You can configure your `DOMAIN` in `local.env.sample` file. Make sure to restart the containers after changing it:
+You can configure your `DOMAIN` in `.env` file. Make sure to restart the containers after changing it:
 ```dotenv
 DOMAIN=test.local
 ```
@@ -116,7 +116,7 @@ DOMAIN=test.local
 The application is also available at `https://<DOMAIN>` per default.
 
 #### On the network
-If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` in your `local.env.sample` 
+If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` in your `.env` 
 file to the IP your computer has on the corresponding network interface. **For example**:
 ```dotenv
 EXTERNAL_IP=192.168.178.54
@@ -154,7 +154,7 @@ npm <any-npm-command>
 grunt
 <any-other-command>
 ```
-`COMPOSE_PROJECT_NAME` is defined in your `local.env.sample` file
+`COMPOSE_PROJECT_NAME` is defined in your `.env` file
 
 
 
@@ -298,7 +298,7 @@ NPM_INSTALL_PATHS: ./path:./another/path
 ```
 
 
-### 6. install wkhtmltopdf
+### 6. Install wkhtmltopdf
 If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
 ```yaml
 services:
@@ -346,12 +346,5 @@ docker exec -it <container-name> /bin/bash
 * [x] get rid of apache2-foreground ssl:warnings
 * [x] automate config files more - "template"-language, that dynamically replaces ${VARIABLES} of config files and maps them with volumes
 * [x] install grunt into container
-* [ ] npm and composer install with wildcard (recursive) directory syntax (https://github.com/wikimedia/composer-merge-plugin -> https://github.com/wikimedia/composer-merge-plugin/pull/189 ?)
-* [ ] test WKHTMLTOPDF in application (copy db + get salt from production)
+* [ ] test WKHTMLTOPDF in application (bti-brandschutz error: companies association is not defined in Projects -> ask Robin)
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
-* [ ] hostsfile script error:
-```
-###127.55.0.3 test.docker
-##127.55.0.4 test.docker
-#127.55.0.5 test.docker
-```
