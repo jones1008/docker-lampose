@@ -368,3 +368,5 @@ docker exec -it <container-name> /bin/bash
 * [x] replace-templates.sh: support for default values (syntax: `${WEB_PORT:-80}`)
 * [ ] test WKHTMLTOPDF in application (bti-brandschutz error: companies association is not defined in Projects -> ask Robin)
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
+* [ ] path mapping mit xdebug im Storm
+* [ } composer install und npm install nur ausführen, wenn notwendig?
