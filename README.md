@@ -94,11 +94,22 @@ The first time executing this takes a few minutes.
 
 > **Tip**: The Dashboard of Docker Desktop can be quite useful to manage your containers.
 
+#### Port error
+If you get an error like:
+```
+Ports are not available: listen tcp 127.55.0.1:3308: bind: Der Zugriff auf einen Socket war aufgrund der Zugrifssrechte des Sockets unzulässig.
+```
+You have to change the corresponding port in you `.env` file to a port that is available on your local system. **For example**:
+```dotenv
+WEB_PORT: 8081
+WEB_PORT_SSL: 4443
+DB_PORT: 3309
+```
 
 ### 6. Connect to database (client)
 You can connect to the database (for example [DBeaver](https://dbeaver.io/)) with the following credentials:
-- host: the `DOMAIN` you specified in your `.env` file
-- port: `3307`(!!)
+- host: the `DOMAIN` variable you specified in your `.env` file
+- port: the `DB_PORT` variable you specified in your `.env` file
 - user: `root`
 - password: `root` (if not specified differently in `docker-compose.yml` with the environment variable `MYSQL_ROOT_PASSWORD` of the `db` container)
 - database name: the `DATABASE_FILE_MAIN` or `DATABASE_FILE_<OTHER_SUFFIX>` you specified in your `.env` file
@@ -106,14 +117,14 @@ You can connect to the database (for example [DBeaver](https://dbeaver.io/)) wit
 
 ### 7. Open Application
 #### Local
-To open the application frontend open `http://<DOMAIN>` in your browser.
+To open the application frontend open `http://<DOMAIN>:<WEB_PORT>` in your browser.
 
 You can configure your `DOMAIN` in `.env` file. Make sure to restart the containers after changing it:
 ```dotenv
 DOMAIN=test.local
 ```
 #### https
-The application is also available at `https://<DOMAIN>` per default.
+The application is also available at `https://<DOMAIN>:<WEB_PORT_SSL>` per default.
 
 #### On the network
 If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` in your `.env` 
@@ -121,7 +132,7 @@ file to the IP your computer has on the corresponding network interface. **For e
 ```dotenv
 EXTERNAL_IP=192.168.178.54
 ```
-After you restarted your container, the application will be available at `http://192.168.178.54` on the network you are connected to.
+After you restarted your container, the application will be available at `http://192.168.178.54:<WEB_PORT>` on the network you are connected to.
 
 ### 8. xdebug
 xdebug is **installed and enabled by default**.
@@ -215,7 +226,7 @@ DocumentRoot /var/www/html/webroot
 If you need to configure some database parameters (for example `innodb_file_format`), you can do that in the `_docker/db/my.cnf` file.
 
 
-### Custom application configuration files
+### 4. Custom application configuration files
 If you have a git ignored file (for example a `database_config.php`) in your application that normally needs to be edited,
 you can define a template file, that reduces further configuration of the Docker user.
 
@@ -268,7 +279,7 @@ return [
 ];
 ```
 
-### 4. Install Composer
+### 5. Install Composer
 Composer is installed per default, and it runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
 ```yaml
 services:
@@ -283,7 +294,7 @@ COMPOSER_INSTALL_PATHS: ./path:./another/path
 ```
 
 
-### 5. Run `npm install` at startup
+### 6. Run `npm install` at startup
 Node.js and `npm` is installed per default, and it automatically runs `npm install` in the directory you specified with:  
 ```yaml
 services:
@@ -298,7 +309,7 @@ NPM_INSTALL_PATHS: ./path:./another/path
 ```
 
 
-### 6. Install wkhtmltopdf
+### 7. Install wkhtmltopdf
 If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
 ```yaml
 services:

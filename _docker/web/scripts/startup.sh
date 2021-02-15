@@ -47,9 +47,21 @@ fi
 cd "$wd"
 
 sleep 1 && \
-echo "application started with self-signed certificate at https://$DOMAIN and without at http://$DOMAIN" && \
+httpDomain="http://$DOMAIN" && \
+httpsDomain="https://$DOMAIN" && \
+if [ -n "$WEB_PORT" ]; then \
+  httpDomain="$httpDomain:$WEB_PORT"; \
+fi && \
+if [ -n "$WEB_PORT_SSL" ]; then \
+  httpsDomain="$httpsDomain:$WEB_PORT_SSL"; \
+fi && \
+echo "application started with self-signed certificate at $httpsDomain and without at $httpDomain" && \
 if [ -n "$EXTERNAL_IP" ]; then \
-  echo "application started at http://$EXTERNAL_IP"; \
+  externalDomain="http://$EXTERNAL_IP"; \
+  if [ -n "$WEB_PORT" ]; then \
+    externalDomain="$externalDomain:$WEB_PORT"; \
+  fi && \
+  echo "application started at $externalDomain"; \
 fi & \
 
 exec 'apache2-foreground'

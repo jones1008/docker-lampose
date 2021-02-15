@@ -23,9 +23,9 @@ services:
       - ./_docker/web/certs:/etc/apache2/ssl
       - ${HOSTS_FILE}:/tmp/hostsfile
     ports:
-      - "${LOOPBACK_IP:-127.255.255.254}:80:80"
-      - "${LOOPBACK_IP:-127.255.255.254}:443:443"
-      - "${EXTERNAL_IP:-127.255.255.253}:80:80"
+      - "${LOOPBACK_IP:-127.255.255.254}:${WEB_PORT:-80}:80"
+      - "${LOOPBACK_IP:-127.255.255.254}:${WEB_PORT_SSL:-443}:443"
+      - "${EXTERNAL_IP:-127.255.255.253}:${WEB_PORT:-80}:80"
     depends_on:
       - db
 
@@ -42,4 +42,4 @@ services:
       - ./_docker/db:/docker-entrypoint-initdb.d
       - ./_docker/db/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
-      - "${LOOPBACK_IP:-127.255.255.254}:3307:3306"
+      - "${LOOPBACK_IP:-127.255.255.254}:${DB_PORT:-3306}:3306"
