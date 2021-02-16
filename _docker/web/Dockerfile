@@ -26,7 +26,7 @@ RUN /install-xdebug.sh
 RUN docker-php-ext-enable xdebug
 
 
-# install composer
+# install composer (more info on composer installation: https://github.com/mlocati/docker-php-extension-installer#installing-composer)
 RUN install-php-extensions @composer && apt-get update && apt-get install -y unzip git
 
 # prepare other installations

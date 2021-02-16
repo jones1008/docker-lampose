@@ -17,7 +17,7 @@ It holds the database server and is therefore responsible for managing database 
 If your application has **git submodules** make sure to pull them first. 
 If you have a `.gitmodules` file in your root directory you will probably want to do this. 
 ```shell
-git submodule update --recursive
+git submodule update --init --recursive
 ```
 
 # Configure and run the dockerized application:
@@ -286,7 +286,7 @@ return [
 ```
 
 ### 5. Install Composer
-Composer is installed per default, and it runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
+Composer is installed per default in it's lates version, and it runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
 ```yaml
 services:
   web:
@@ -298,6 +298,13 @@ If you need to execute `composer install` in multiple paths you can do this by s
 ```yaml
 COMPOSER_INSTALL_PATHS: ./path:./another/path
 ```
+
+If you need another composer version installed (for example `1.x`) you can change this in the `Dockerfile` under `_docker/web/`:
+```dockerfile
+# install composer
+RUN install-php-extensions @composer-1 && apt-get update && apt-get install -y unzip git
+```
+More info on this on https://github.com/mlocati/docker-php-extension-installer#installing-composer
 
 
 ### 6. Run `npm install` at startup
@@ -329,6 +336,13 @@ After that you have to rebuild the container (see Note 1)
 
 The binary path is stored in the environment variable `WKHTMLTOPDF_BINARY` available in the `web` container
 
+
+### 8. Match your server setup
+With Docker you want to match the environment of the server where the application will run later as close as possible.
+This helps prevent weird errors and bugs that only occur on the live system or only on your development system.
+
+Here are some additional tips to prevent them in the first place:
+1. 
 
 ## Troubleshoot
 #### bash into container:
@@ -366,7 +380,11 @@ docker exec -it <container-name> /bin/bash
 * [x] error when database name has - in name
 * [x] 3307 as default port
 * [x] replace-templates.sh: support for default values (syntax: `${WEB_PORT:-80}`)
-* [ ] test WKHTMLTOPDF in application (bti-brandschutz error: companies association is not defined in Projects -> ask Robin)
+* [x] bti-brandschutz: Fehler beim Anmelden: funktioniert nicht für bti-brandschutz.docker domain (Problem nur im Chrome: gefixt mit Cookies UND Websitedaten löschen: chrome://settings/siteData?searchSubpage=.docker)
+* [x] test WKHTMLTOPDF in application
+* [ ] better automation with xdebug path mapping (on a CakePHP project)
+* [ ] automate LOOPBACK_IP?
+* [ ] Dockerization Tips: add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
+* [ ] catch Emails like in devilbox?
+* [ ] enable http2 on apache server?: https://http2.pro/doc/Apache (php-fpm)
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
-* [ ] path mapping mit xdebug im Storm
-* [ } composer install und npm install nur ausführen, wenn notwendig?

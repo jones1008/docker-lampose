@@ -20,14 +20,14 @@ cp "$hostsFile" "$tmpHostsFile"
 
 if grep -q -P "^\s*(?!${LOOPBACK_IP})([0-9]{1,3}[\.]){3}[0-9]{1,3}\s+${DOMAIN}\s*$" "$tmpHostsFile"; then
   # entry exists with another IP: comment out existing entry
-  echo "[WARN]: set-hostname.sh: entry for $DOMAIN already exists in hosts file, commenting these lines out"
+  echo "[WARN]: set-hostname.sh: entry for $DOMAIN already exists in hosts file '$HOSTS_FILE', commenting these lines out"
   sed -i -r "/^\s*${LOOPBACK_IP}/!s/(\b[0-9]{1,3}\.){3}[0-9]{1,3}\s+${DOMAIN}\b"/"#&"/ "$tmpHostsFile"
   fileEdited=true
 fi
 
-if grep -q -P "^\s*${LOOPBACK_IP}\s+(?!${DOMAIN})\s*$" "$tmpHostsFile"; then
+if grep -q -P "^\s*${LOOPBACK_IP}\s+(?!${DOMAIN})" "$tmpHostsFile"; then
   # IP exists for other domain
-  echo "[WARN]: set-hostname.sh: entry for $LOOPBACK_IP with another domain already exists. This may lead to container hostname conflicts"
+  echo "[WARN]: set-hostname.sh: entry for $LOOPBACK_IP with another domain already exists in hosts file '$HOSTS_FILE'. This may lead to container hostname conflicts"
 fi
 
 if ! grep -q -P "^\s*${LOOPBACK_IP}\s+${DOMAIN}\s*$" "$tmpHostsFile"; then
@@ -40,7 +40,7 @@ if ! grep -q -P "^\s*${LOOPBACK_IP}\s+${DOMAIN}\s*$" "$tmpHostsFile"; then
   fi
 
   # add new entry
-  echo "[INFO]: set-hostname.sh: adding new entry: $LOOPBACK_IP $DOMAIN"
+  echo "[INFO]: set-hostname.sh: adding new entry to hosts file '$HOSTS_FILE': $LOOPBACK_IP $DOMAIN"
   printf "%s %s\r\n" "$LOOPBACK_IP" "$DOMAIN" >> "$tmpHostsFile"
 
   fileEdited=true
