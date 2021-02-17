@@ -139,17 +139,6 @@ After you restarted your container, the application will be available at `http:/
 ### 8. Xdebug
 Xdebug is **installed and enabled by default** and is ready to use.
 
-#### Xdebug usage:
-To use xdebug with PHPStorm do the following:
-1. Set a breakpoint in your code: ![_docker/docs/xdebug-step1.png](_docker/docs/xdebug-step1.png)
-2. Listen to xdebug connections in your IDE: ![_docker/docs/xdebug-step2.png](_docker/docs/xdebug-step2.png)
-3. Turn on your browser debug extension and reload page: ![_docker/docs/xdebug-step3.png](_docker/docs/xdebug-step3.png)
-4. **Choose correct project** and accept incoming connection: ![_docker/docs/xdebug-step4.png](_docker/docs/xdebug-step4.png)
-5. Set path mappings in IDE settings: root of project should be set to `/var/www/html` ![_docker/docs/xdebug-step5.png](_docker/docs/xdebug-step5.png)
-6. Reload page
-
-If you fucked up somewhere in between, delete the server configuration in `Settings > Languages & Frameworks > PHP > Servers` and start over.
-
 #### Xdebug Configuration
 
 To disable xdebug with PHP version `< 7.2` change the file `./_docker/web/additional-inis/xdebug.ini` to:
@@ -166,7 +155,67 @@ xdebug.mode=debug
 ```
 After that you need to restart the container.
 
-In this file you can also specify any other xdebug config you need
+In this file you can also specify any other xdebug config you might need.
+
+#### Xdebug usage:
+To use xdebug with PHPStorm do the following:
+1. Set a breakpoint in your code:
+   
+   ![_docker/docs/xdebug-step1.png](_docker/docs/xdebug-step1.png)
+2. Listen to xdebug connections in your IDE: 
+   
+   ![_docker/docs/xdebug-step2.png](_docker/docs/xdebug-step2.png)
+3. Turn on your browser debug extension and reload page: 
+   
+   ![_docker/docs/xdebug-step3.png](_docker/docs/xdebug-step3.png)
+4. **Choose correct project** and accept incoming connection: 
+   
+   ![_docker/docs/xdebug-step4.png](_docker/docs/xdebug-step4.png)
+5. Set path mappings in IDE settings: root of project should be set to `/var/www/html` 
+   
+   ![_docker/docs/xdebug-step5.png](_docker/docs/xdebug-step5.png)
+6. Reload page
+
+If you fucked up somewhere in between, delete the server configuration in `Settings > Languages & Frameworks > PHP > Servers` and start over.
+
+#### Xdebug remote connection to server:
+To debug an application from a remote server in your local IDE do the following (on the example of project `bti-brandschutz-dev` available at https://dev.bti-brandschutz.de):
+> **Warning**: this is currently untested for server xdebug versions `>= 3.X`. You may need to adjust some more xdebug variables. In this case, this may help: https://xdebug.org/docs/upgrade_guide 
+1. Make sure your docker container are running
+2. Enable xdebug extension on the server. Here with example from Hetzner:
+   
+   ![_docker/docs/xdebug-remote-step2.png](_docker/docs/xdebug-remote-step2.png)
+3. Make sure the xdebug variables are set as follows:
+   ```ini
+   xdebug.remote_enable=1
+   xdebug.remote_connect_back=0
+   xdebug.remote_host=localhost
+   xdebug.remote_port=9000        # change to port 9003 on xdebug version >= 3.X (run 'php --version' to find out)
+   ```
+   These variables can also be set with an `.htaccess` file in the root directory on the server like:
+   ```apacheconf
+   php_flag xdebug.remote_enable On
+   php_flag xdebug.remote_connect_back Off
+   php_value xdebug.remote_host localhost
+   php_value xdebug.remote_port 9000       # change to port 9003 on xdebug version >= 3.X (run 'php --version' to find out)
+   ```
+       
+4. Start an SSH tunnel from your machine to the server and enter the ssh password:
+   ```shell
+   ssh -p <server-ssh-port> -R 9000:<DOMAIN>:9000 <server-ssh-user>@<server-ip>
+   ```
+   *Note 1*: `DOMAIN` is the domain you configured in your `.env` file. 
+   The other parameters should be available from the provider, where the site is hosted. 
+   
+   *Note 2*: Set the xdebug `9000` to `9003` if the xdebug version of the server is `>= 3.X`. 
+   You can find out which xdebug version the server has by running `php --version` if the xdebug extension is enabled
+   
+
+5. Once the SSH tunnel connection is established, **follow the steps from *Xdebug usage* above**.
+
+   **Note**: At *step 5* the root of your project is **NOT** `/var/www/html`. 
+   Instead, in the SSH session `cd` to the root path of the project and run `pwd` to get the full absolute path.
+   Enter this path at *step 5* as your project root.
 
 
 ### 9. Composer, npm, grunt and other commands
@@ -401,8 +450,8 @@ docker exec -it <container-name> /bin/bash
 * [x] test WKHTMLTOPDF in application
 * [x] automate LOOPBACK_IP?
 * [x] xdebug path mapping documentation
+* [x] support xdebug with remote server (ssh tunnel etc.)
 * [ ] Dockerization Tips: add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] catch Emails like in devilbox?
 * [ ] enable http2 on apache server?: https://http2.pro/doc/Apache (php-fpm)
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
-* [ ] support xdebug with remote server (ssh tunnel etc.)
