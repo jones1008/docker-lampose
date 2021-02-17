@@ -33,12 +33,14 @@ COMPOSE_PROJECT_NAME=my-project
 This prevents container name collisions in the future.
 ___
 
-Set an **unused loopback IP** from the IP range `127.0.0.0/8` in your `.env` file. 
-Unused means the loopback IP does not appear in your `hosts` file. For example:
+Before we can configure a custom domain where your application will be available at, 
+we need to set an **unused loopback IP** from the IP range `127.0.0.0/8` in your `.env` file. 
+
+For example:
 ```dotenv
-LOOPBACK_IP=127.55.0.1
+LOOPBACK_IP=127.0.0.2
 ```
-This is needed to configure a custom domain where your application will be available at.
+**Note**: If your configured `LOOPBACK_IP` is already in use, it will tell you the next free IP at container startup.
 ___
 Set a custom domain where your application will be available at:
 ```dotenv
@@ -382,8 +384,8 @@ docker exec -it <container-name> /bin/bash
 * [x] replace-templates.sh: support for default values (syntax: `${WEB_PORT:-80}`)
 * [x] bti-brandschutz: Fehler beim Anmelden: funktioniert nicht für bti-brandschutz.docker domain (Problem nur im Chrome: gefixt mit Cookies UND Websitedaten löschen: chrome://settings/siteData?searchSubpage=.docker)
 * [x] test WKHTMLTOPDF in application
+* [x] automate LOOPBACK_IP?
 * [ ] better automation with xdebug path mapping (on a CakePHP project)
-* [ ] automate LOOPBACK_IP?
 * [ ] Dockerization Tips: add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] catch Emails like in devilbox?
 * [ ] enable http2 on apache server?: https://http2.pro/doc/Apache (php-fpm)
