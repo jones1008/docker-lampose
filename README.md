@@ -136,8 +136,21 @@ EXTERNAL_IP=192.168.178.54
 ```
 After you restarted your container, the application will be available at `http://192.168.178.54:<WEB_PORT>` on the network you are connected to.
 
-### 8. xdebug
-xdebug is **installed and enabled by default**.
+### 8. Xdebug
+Xdebug is **installed and enabled by default** and is ready to use.
+
+#### Xdebug usage:
+To use xdebug with PHPStorm do the following:
+1. Set a breakpoint in your code: ![_docker/docs/xdebug-step1.png](_docker/docs/xdebug-step1.png)
+2. Listen to xdebug connections in your IDE: ![_docker/docs/xdebug-step2.png](_docker/docs/xdebug-step2.png)
+3. Turn on your browser debug extension and reload page: ![_docker/docs/xdebug-step3.png](_docker/docs/xdebug-step3.png)
+4. **Choose correct project** and accept incoming connection: ![_docker/docs/xdebug-step4.png](_docker/docs/xdebug-step4.png)
+5. Set path mappings in IDE settings: root of project should be set to `/var/www/html` ![_docker/docs/xdebug-step5.png](_docker/docs/xdebug-step5.png)
+6. Reload page
+
+If you fucked up somewhere in between, delete the server configuration in `Settings > Languages & Frameworks > PHP > Servers` and start over.
+
+#### Xdebug Configuration
 
 To disable xdebug with PHP version `< 7.2` change the file `./_docker/web/additional-inis/xdebug.ini` to:
 ```ini
@@ -152,6 +165,8 @@ To enable xdebug with PHP version `>= 7.2` change the file `./_docker/web/additi
 xdebug.mode=debug
 ```
 After that you need to restart the container.
+
+In this file you can also specify any other xdebug config you need
 
 
 ### 9. Composer, npm, grunt and other commands
@@ -385,8 +400,9 @@ docker exec -it <container-name> /bin/bash
 * [x] bti-brandschutz: Fehler beim Anmelden: funktioniert nicht für bti-brandschutz.docker domain (Problem nur im Chrome: gefixt mit Cookies UND Websitedaten löschen: chrome://settings/siteData?searchSubpage=.docker)
 * [x] test WKHTMLTOPDF in application
 * [x] automate LOOPBACK_IP?
-* [ ] better automation with xdebug path mapping (on a CakePHP project)
+* [x] xdebug path mapping documentation
 * [ ] Dockerization Tips: add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] catch Emails like in devilbox?
 * [ ] enable http2 on apache server?: https://http2.pro/doc/Apache (php-fpm)
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
+* [ ] support xdebug with remote server (ssh tunnel etc.)
