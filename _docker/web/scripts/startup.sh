@@ -42,6 +42,18 @@ if [ -n "$NPM_INSTALL_PATHS" ]; then
   done
 fi
 
+# call catch-mail.sh
+if [ -n "$CATCH_MAIL" ] && [ "$CATCH_MAIL" = "true" ]; then
+    if ! ./_docker/web/scripts/setup-catch-mail.sh; then
+      exit 1
+    fi
+
+    if [ -z "$CATCH_MAIL_PORT" ]; then
+        CATCH_MAIL_PORT=8025
+    fi
+    echo "All catched mails available at http://$DOMAIN:$CATCH_MAIL_PORT"
+fi
+
 
 # start application
 cd "$wd"

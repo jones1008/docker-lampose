@@ -234,6 +234,20 @@ grunt
 `COMPOSE_PROJECT_NAME` is defined in your `.env` file
 
 
+### 10. Catch outgoing mails
+In a big application it is likely that there will be emails sent to a user at some point.
+
+To avoid sending emails to users while developing or testing, the `web` container catches all emails sent to port `25`,
+`465` or `587` and sends them to a local mail server called *MailHog*.
+
+The `web` container will catch these outgoing emails, if you enable it in your `.env` file:
+```dotenv
+CATCH_MAIL=true
+```
+To disable catching these emails and sending them normally, just comment out or set to `false`.
+
+You can look at the catched emails at `http://<DOMAIN>:<CATCH_MAIL_PORT>`. The default `CATCH_MAIL_PORT` is `8025`.
+
 
 
 # Dockerize the application:
@@ -451,7 +465,6 @@ docker exec -it <container-name> /bin/bash
 * [x] automate LOOPBACK_IP?
 * [x] xdebug path mapping documentation
 * [x] support xdebug with remote server (ssh tunnel etc.)
+* [x] reroute emails to mailhog installation
 * [ ] Dockerization Tips: add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
-* [ ] catch Emails like in devilbox?
-* [ ] enable http2 on apache server?: https://http2.pro/doc/Apache (php-fpm)
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
