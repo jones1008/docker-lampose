@@ -1,5 +1,8 @@
 FROM php:7.4-apache
 
+# use german mirrors for increased apt install and update speeds
+COPY ./sources.list /etc/apt/sources.list
+
 WORKDIR /var/www/html
 
 # enable apache module rewrite
