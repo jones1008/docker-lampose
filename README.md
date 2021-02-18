@@ -468,3 +468,6 @@ docker exec -it <container-name> /bin/bash
 * [x] reroute emails to mailhog installation
 * [ ] Dockerization Tips: add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
+* [ ] INSTALL_NPM flag + INSTALL_GRUNT flag for Dockerfile
+* [ ] fix SSL_ERROR_RX_RECORD_TOO_LONG at gkm.docker:8181
+* [ ] script for automatic web container entrance

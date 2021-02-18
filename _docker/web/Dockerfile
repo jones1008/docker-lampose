@@ -17,8 +17,8 @@ COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr
 RUN install-php-extensions opcache      # for 2x better performance
 RUN install-php-extensions pdo_mysql    # for mysqli connections
 RUN install-php-extensions mysqli       # requires php7.0 or higher
-#RUN install-php-extensions gd
-#RUN install-php-extensions intl
+RUN install-php-extensions intl
+RUN install-php-extensions gd
 #RUN install-php-extensions zip
 #RUN install-php-extensions imagick      # warning: this is huge
 #...
@@ -32,9 +32,6 @@ RUN docker-php-ext-enable xdebug
 
 # install composer (more info on composer installation: https://github.com/mlocati/docker-php-extension-installer#installing-composer)
 RUN install-php-extensions @composer && apt-get update && apt-get install -y unzip git
-
-# prepare other installations
-RUN apt-get update && apt-get install -y curl
 
 # install npm
 RUN apt-get update && apt-get install -y curl \
