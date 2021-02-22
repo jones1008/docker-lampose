@@ -4,7 +4,12 @@ services:
       context: _docker/web
       dockerfile: Dockerfile
       args:
-        INSTALL_WKHTMLTOPDF: "false"    # change requires container rebuild
+        # changes to one of the following requires container rebuild
+        INSTALL_COMPOSER: "true"
+        INSTALL_NPM: "false"
+        INSTALL_GRUNT: "false"
+        INSTALL_WKHTMLTOPDF: "false"
+        INSTALL_LOCALES: "de_DE"
     container_name: web-${COMPOSE_PROJECT_NAME}
     command: /var/www/html/_docker/web/scripts/startup.sh
     environment:
@@ -15,7 +20,7 @@ services:
       #NPM_INSTALL_PATHS: ./
     env_file:
       - .env
-      - public.env
+      - _docker/public.env
     cap_add:
       - NET_ADMIN  # needed to make changes to iptables
     volumes:
@@ -40,7 +45,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
     env_file:
       - .env
-      - public.env
+      - _docker/public.env
     volumes:
       - ./_docker/db:/docker-entrypoint-initdb.d
       - ./_docker/db/my.cnf:/etc/my.cnf.d/my.cnf

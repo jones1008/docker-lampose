@@ -3,6 +3,8 @@ FROM php:7.4-apache
 # use german mirrors for increased apt install and update speeds
 COPY ./sources.list /etc/apt/sources.list
 
+COPY ./scripts/build/* /build-scripts/
+
 WORKDIR /var/www/html
 
 # enable apache module rewrite
@@ -25,21 +27,28 @@ RUN install-php-extensions gd
 
 
 # install correct xdebug version with script (https://xdebug.org/)
-COPY ./scripts/install-xdebug.sh /install-xdebug.sh
-RUN /install-xdebug.sh
-RUN docker-php-ext-enable xdebug
+RUN /build-scripts/install-xdebug.sh && docker-php-ext-enable xdebug
 
 
 # install composer (more info on composer installation: https://github.com/mlocati/docker-php-extension-installer#installing-composer)
-RUN install-php-extensions @composer && apt-get update && apt-get install -y unzip git
+ARG INSTALL_COMPOSER="true"
+RUN if [ "$INSTALL_COMPOSER" = "true" ]; then \
+        install-php-extensions @composer && apt-get update && apt-get install -y unzip git \
+    ;fi
 
 # install npm
-RUN apt-get update && apt-get install -y curl \
-    && curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
-    && apt-get install -y nodejs
+ARG INSTALL_NPM="false"
+RUN if [ "$INSTALL_NPM" = "true" ]; then \
+           apt-get update && apt-get install -y curl \
+        && curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
+        && apt-get install -y nodejs \
+    ;fi
 
 # install grunt-cli
-RUN npm install -g grunt-cli
+ARG INSTALL_GRUNT="false"
+RUN if [ "$INSTALL_GRUNT" = "true" ] &&  [ "$INSTALL_NPM" = "true" ]; then \
+        npm install -g grunt-cli \
+    ;fi
 
 # install wkhtmltopdf (https://wkhtmltopdf.org/)
 ARG INSTALL_WKHTMLTOPDF="false"
@@ -59,3 +68,7 @@ RUN apt-get update && apt-get install -y golang-go git \
 
 # removes a DNS warning at startup:
 RUN echo "ServerName localhost" | tee /etc/apache2/conf-available/fqdn.conf && a2enconf fqdn
+
+# install wanted locales, so PHPs `setlocale(LC_ALL, 'de_DE.UTF-8')` will work
+ARG INSTALL_LOCALES=""
+RUN /build-scripts/install-locales.sh "$INSTALL_LOCALES"

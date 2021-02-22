@@ -225,7 +225,7 @@ Composer, npm and grunt is pre-installed in the `web` container.
 
 If you want to manually execute another command, it is best to execute it **in** the container:
 ```bash
-docker exec -it web-<COMPOSE_PROJECT_NAME> /bin/bash  # go into container
+docker-compose exec web bash  # go into container
 composer <any-composer-command>
 npm <any-npm-command>
 grunt
@@ -339,7 +339,7 @@ ${DOMAIN:-test.local}
 ```
 If the environment variable `DOMAIN` is not set, this will default to `test.local`
 
-The variables `DATABASE_USER_MAIN` and `DATABASE_PASS_MAIN` should be set in the `public.env`.
+The variables `DATABASE_USER_MAIN` and `DATABASE_PASS_MAIN` should be set in the `_docker/public.env`.
 If you have more databases set these variables with a different suffix than `_MAIN`:
 ```dotenv
 DATABASE_USER_MAIN="some_user"
@@ -366,7 +366,17 @@ return [
 ```
 
 ### 5. Install Composer
-Composer is installed per default in it's lates version, and it runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
+Composer is installed in its latest version if you define it as a build argument in the `docker-compose.yml`:
+```yaml
+services:
+  web:
+    build:
+      args:
+        INSTALL_COMPOSER: "true"
+```
+
+
+It runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
 ```yaml
 services:
   web:
@@ -388,7 +398,17 @@ More info on this on https://github.com/mlocati/docker-php-extension-installer#i
 
 
 ### 6. Run `npm install` at startup
-Node.js and `npm` is installed per default, and it automatically runs `npm install` in the directory you specified with:  
+Node.js and `npm` is installed if you define it as a build argument in the `docker-compose.yml`:
+```yaml
+services:
+  web:
+    build:
+      args:
+        INSTALL_NPM: "true"
+```
+The same goes for the installation of `grunt` with the build argument `INSTALL_GRUNT`.
+
+If installed it automatically runs `npm install` in the directory you specified with:  
 ```yaml
 services:
   web:
@@ -408,7 +428,6 @@ If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency ch
 services:
   web:
     build:
-      # ...
       args:
         INSTALL_WKHTMLTOPDF: "true"
 ```
@@ -416,8 +435,22 @@ After that you have to rebuild the container (see Note 1)
 
 The binary path is stored in the environment variable `WKHTMLTOPDF_BINARY` available in the `web` container
 
+### 8. Locales
+If you have to install one or more locales in the `web` container, so for example the following PHP function will work... :
+```php
+setlocale(LC_ALL, 'de_DE.UTF-8');
+``` 
+... you can add it to the `web` service as a build argument in the `docker-compose.yml`:
+```yaml
+services:
+   web:
+      build:
+         args:
+            INSTALL_LOCALES: "de_DE, fr_FR"
+```
+`INSTALL_LOCALES` takes a string separated with `,` for multiple locales as input.  
 
-### 8. Match your server setup
+### 9. Match your server setup
 With Docker you want to match the environment of the server where the application will run later as close as possible.
 This helps prevent weird errors and bugs that only occur on the live system or only on your development system.
 
@@ -426,10 +459,10 @@ Here are some additional tips to prevent them in the first place:
 
 ## Troubleshoot
 #### bash into container:
-To troubleshoot anything inside a container, go into the container with:
+To troubleshoot anything inside a container (for example `web`), go into the container with:
 ```shell
-docker exec -it <container-name> /bin/bash
-```
+docker-compose exec web bash
+``` 
 
 
 # Roadmap
@@ -466,8 +499,8 @@ docker exec -it <container-name> /bin/bash
 * [x] xdebug path mapping documentation
 * [x] support xdebug with remote server (ssh tunnel etc.)
 * [x] reroute emails to mailhog installation
+* [x] INSTALL_NPM flag + INSTALL_GRUNT flag for Dockerfile
 * [ ] Dockerization Tips: add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
-* [ ] INSTALL_NPM flag + INSTALL_GRUNT flag for Dockerfile
 * [ ] fix SSL_ERROR_RX_RECORD_TOO_LONG at gkm.docker:8181
-* [ ] script for automatic web container entrance
+* [ ] script for automatic web container entrance? -> docker-compose exec web bash
