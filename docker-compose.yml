@@ -10,6 +10,7 @@ services:
         INSTALL_GRUNT: "false"
         INSTALL_WKHTMLTOPDF: "false"
         INSTALL_LOCALES: "de_DE"
+    image: web-${COMPOSE_PROJECT_NAME}
     container_name: web-${COMPOSE_PROJECT_NAME}
     command: /var/www/html/_docker/web/scripts/startup.sh
     environment:
@@ -39,6 +40,7 @@ services:
 
   db:
     build: _docker/db
+    image: db-${COMPOSE_PROJECT_NAME}
     container_name: db-${COMPOSE_PROJECT_NAME}
     hostname: ${DOMAIN}
     environment:

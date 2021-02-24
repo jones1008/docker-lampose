@@ -72,3 +72,6 @@ RUN echo "ServerName localhost" | tee /etc/apache2/conf-available/fqdn.conf && a
 # install wanted locales, so PHPs `setlocale(LC_ALL, 'de_DE.UTF-8')` will work
 ARG INSTALL_LOCALES=""
 RUN /build-scripts/install-locales.sh "$INSTALL_LOCALES"
+
+# link php binary to /usr/bin/php for compatibility
+RUN ln -s /usr/local/bin/php /usr/bin/php

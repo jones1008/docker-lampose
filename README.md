@@ -136,10 +136,8 @@ EXTERNAL_IP=192.168.178.54
 ```
 After you restarted your container, the application will be available at `http://192.168.178.54:<WEB_PORT>` on the network you are connected to.
 
-### 8. Xdebug
+### 8. Xdebug Configuration
 Xdebug is **installed and enabled by default** and is ready to use.
-
-#### Xdebug Configuration
 
 To disable xdebug with PHP version `< 7.2` change the file `./_docker/web/additional-inis/xdebug.ini` to:
 ```ini
@@ -157,7 +155,8 @@ After that you need to restart the container.
 
 In this file you can also specify any other xdebug config you might need.
 
-#### Xdebug usage:
+### 9. Xdebug usage:
+#### usage in browser
 To use xdebug with PHPStorm do the following:
 1. Set a breakpoint in your code:
    
@@ -177,6 +176,36 @@ To use xdebug with PHPStorm do the following:
 6. Reload page
 
 If you fucked up somewhere in between, delete the server configuration in `Settings > Languages & Frameworks > PHP > Servers` and start over.
+
+#### Debug a PHP script:
+The following picture describes how to setup a Debug Configuration in PHPStorm in `Run - Edit Configurations`: 
+![_docker/docs/xdebug-script-config.png](_docker/docs/xdebug-script-config.png)
+
+1. Click on the `+`  to create a new configuration
+2. Choose `PHP Script`
+3. Choose your local file you want to debug
+4. Choose the PHP interpreter from the docker container
+5. Click on the `+` to create a new PHP CLI Interpreter
+6. Choose `From Docker, Vagrant, VM, WSL, Remote...`
+7. Choose `Docker`
+8. Create a new Docker server if you haven't configured one already
+9. Delete all path mappings here
+
+After that make sure you have the PHP CLI Interpreter configured to the docker container at `Settings - Languages & Frameworks - PHP`:
+![_docker/docs/interpreter.png](_docker/docs/xdebug-script-interpreter.png)
+
+Now you can start debugging your PHP script by...
+1. Setting a breakpoint in your PHP script:
+
+   ![_docker/docs/xdebug-step1.png](_docker/docs/xdebug-step1.png)
+2. Listening to debug connections:
+
+   ![_docker/docs/xdebug-step2.png](_docker/docs/xdebug-step2.png)
+
+3. Start running the script with the debug button:
+
+   ![_docker/docs/xdebug-script-debug-button.png](_docker/docs/xdebug-script-debug-button.png)
+
 
 #### Xdebug remote connection to server:
 To debug an application from a remote server in your local IDE do the following (on the example of project `bti-brandschutz-dev` available at https://dev.bti-brandschutz.de):
@@ -218,7 +247,7 @@ To debug an application from a remote server in your local IDE do the following 
    Enter this path at *step 5* as your project root.
 
 
-### 9. Composer, npm, grunt and other commands
+### 10. Composer, npm, grunt and other commands
 Composer, npm and grunt is pre-installed in the `web` container.
 
 `composer install` and `npm install` is automatically executed at container startup if configured.
@@ -236,7 +265,7 @@ grunt
 `COMPOSE_PROJECT_NAME` is defined in your `.env` file
 
 
-### 10. Catch outgoing mails
+### 11. Catch outgoing mails
 In a big application it is likely that there will be emails sent to a user at some point.
 
 To avoid sending emails to users while developing or testing, the `web` container catches all emails sent to port `25`,
@@ -513,8 +542,11 @@ docker-compose exec <service-name> bash
 * [x] INSTALL_NPM flag + INSTALL_GRUNT flag for Dockerfile
 * [x] script for automatic web container entrance? -> docker-compose exec web bash
 * [x] container entrance script independent of platform?
+* [x] support for php script xdebugging (e.g. via cake command class or classic script) -> PHPStorm: Languages & Frameworks - PHP -> CLI Interpreters; PHPStorm: Build, Execution, Deployment - Docker - add new Docker connection with path mapping
+* [x] progress output for initial .sql file import (working inside container; not working with `docker-compose up`)
+* [ ] php xdebug script with docker: db connection fails (see gkm.docker (cakephp) -> bin/cake.php next_delivery)
 * [ ] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
-* [ ] progress output for initial .sql file import (working inside container; not working with `docker-compose up`)
-* [ ] support for php script xdebugging (e.g. via cake command class or classic script) -> PHPStorm: Languages & Frameworks - PHP -> CLI Interpreters; PHPStorm: Build, Execution, Deployment - Docker - add new Docker connection with path mapping
-* [ ] test xdebug on linux
+* [ ] test xdebug on linux and on macos
+* [ ] hint in documentation that `docker-compose down` will delete database in container (all changes gone)
+* [ ] rename image + containers: <name>-web, <name>-db
