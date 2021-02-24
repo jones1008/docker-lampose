@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /docker-entrypoint-initdb.d/sql
+cd /sql-files
 
 prefix=DATABASE_
 
@@ -25,12 +25,14 @@ for dbNameVarName in "${!DATABASE_NAME_@}"; do
 
   if [ -f "$sqlFile" ]; then
     echo "[INFO]: import-databases.sh: creating database '$dbName' accessible by user '$user'"
-    /usr/bin/mysql -u root <<-EOF
+    mysql -u root <<-EOF
       CREATE DATABASE IF NOT EXISTS \`$dbName\`;
       GRANT ALL PRIVILEGES ON \`$dbName\`.* TO \`$user\`@'%' IDENTIFIED BY '$password';
 EOF
     echo "[INFO]: import-databases.sh: importing '$sqlFile' into database '$dbName'..."
-    /usr/bin/mysql -u root "$dbName" < "./$sqlFile"
+
+    # output line by line progress of import
+    pv --numeric "$sqlFile" | mysql -u root "$dbName" --init-command="SET autocommit=0;"
   else
     echo "[ERROR]: import-databases.sh: file $sqlFile for import not found"
   fi

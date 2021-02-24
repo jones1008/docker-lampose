@@ -47,7 +47,8 @@ services:
       - .env
       - _docker/public.env
     volumes:
-      - ./_docker/db:/docker-entrypoint-initdb.d
+      - ./_docker/db/scripts:/docker-entrypoint-initdb.d
+      - ./_docker/db/sql:/sql-files
       - ./_docker/db/my.cnf:/etc/my.cnf.d/my.cnf
     ports:
       - "${LOOPBACK_IP:-127.255.255.254}:${DB_PORT:-3306}:3306"
