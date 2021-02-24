@@ -225,7 +225,9 @@ Composer, npm and grunt is pre-installed in the `web` container.
 
 If you want to manually execute another command, it is best to execute it **in** the container:
 ```bash
-docker-compose exec web bash  # go into container
+./shell # go into container on unix/linux
+shell # go into container on windows
+
 composer <any-composer-command>
 npm <any-npm-command>
 grunt
@@ -459,10 +461,19 @@ Here are some additional tips to prevent them in the first place:
 
 ## Troubleshoot
 #### bash into container:
-To troubleshoot anything inside a container (for example `web`), go into the container with:
+To troubleshoot anything inside the `web` container simply run the `shell` script:
 ```shell
-docker-compose exec web bash
+# on unix/linux:
+./shell
+# on windows:
+shell
 ``` 
+
+To troubleshoot anything in a container other than `web` run the following command:
+```shell
+docker-compose exec <service-name> bash
+```
+
 
 
 # Roadmap
@@ -500,7 +511,10 @@ docker-compose exec web bash
 * [x] support xdebug with remote server (ssh tunnel etc.)
 * [x] reroute emails to mailhog installation
 * [x] INSTALL_NPM flag + INSTALL_GRUNT flag for Dockerfile
-* [ ] Dockerization Tips: add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
+* [x] script for automatic web container entrance? -> docker-compose exec web bash
+* [x] container entrance script independent of platform?
+* [ ] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
-* [ ] fix SSL_ERROR_RX_RECORD_TOO_LONG at gkm.docker:8181
-* [ ] script for automatic web container entrance? -> docker-compose exec web bash
+* [ ] progress output for initial .sql file import (working inside container; not working with `docker-compose up`)
+* [ ] support for php script xdebugging (e.g. via cake command class or classic script) -> PHPStorm: Languages & Frameworks - PHP -> CLI Interpreters; PHPStorm: Build, Execution, Deployment - Docker - add new Docker connection with path mapping
+* [ ] test xdebug on linux
