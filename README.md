@@ -225,8 +225,8 @@ Composer, npm and grunt is pre-installed in the `web` container.
 
 If you want to manually execute another command, it is best to execute it **in** the container:
 ```bash
-./shell # go into container on unix/linux
-shell # go into container on windows
+./shell.cmd # go into container on unix/linux
+shell.cmd # go into container on windows
 
 composer <any-composer-command>
 npm <any-npm-command>
@@ -464,9 +464,9 @@ Here are some additional tips to prevent them in the first place:
 To troubleshoot anything inside the `web` container simply run the `shell` script:
 ```shell
 # on unix/linux:
-./shell
+./shell.cmd
 # on windows:
-shell
+shell.cmd
 ``` 
 
 To troubleshoot anything in a container other than `web` run the following command:
