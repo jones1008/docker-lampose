@@ -490,19 +490,28 @@ Here are some additional tips to prevent them in the first place:
 
 ## Troubleshoot
 #### bash into container:
-To troubleshoot anything inside the `web` container simply run the `shell` script:
+To go into a container simply run the `shell` script with it's two optional parameters.
+
+The *first parameter* is the corresponding docker service name of the container (for example `db`). The default is `web`.
+
+The *second parameter* is the shell entry point (for example `/bin/sh`). The default is `/bin/bash`.
+
 ```shell
 # on unix/linux:
-./shell.cmd
+./shell.cmd               # goes into web container
 # on windows:
-shell.cmd
-``` 
+shell.cmd                 # goes into web container
 
-To troubleshoot anything in a container other than `web` run the following command:
-```shell
-docker-compose exec <service-name> bash
+# on unix/linux:
+./shell.cmd db            # goes into db container
+# on windows:
+shell.cmd db              # goes into db container
+
+# on unix/linux:
+./shell.cmd db /bin/sh    # goes into db container on /bin/sh
+# on windows:
+shell.cmd db /bin/sh      # goes into db container on /bin/sh
 ```
-
 
 
 # Roadmap
@@ -544,7 +553,7 @@ docker-compose exec <service-name> bash
 * [x] container entrance script independent of platform?
 * [x] support for php script xdebugging (e.g. via cake command class or classic script) -> PHPStorm: Languages & Frameworks - PHP -> CLI Interpreters; PHPStorm: Build, Execution, Deployment - Docker - add new Docker connection with path mapping
 * [x] progress output for initial .sql file import (working inside container; not working with `docker-compose up`)
-* [ ] php xdebug script with docker: db connection fails (see gkm.docker (cakephp) -> bin/cake.php next_delivery)
+* [ ] php xdebug script with docker: db connection fails (see gkm.docker (cakephp) -> bin/cake.php next_delivery) (wrong path mapping? pwd -> /opt/project)
 * [ ] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
 * [ ] test xdebug on linux and on macos
