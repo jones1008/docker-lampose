@@ -28,7 +28,7 @@ copy `.env.sample` to `.env`
 ### 2. Set some important variables
 Set your project name in the `.env` file like so:
 ```dotenv
-COMPOSE_PROJECT_NAME=my-project
+PROJECT_NAME=my-project
 ```
 This prevents container name collisions in the future.
 ___
@@ -184,25 +184,22 @@ The following picture describes how to setup a Debug Configuration in PHPStorm i
 1. Click on the `+`  to create a new configuration
 2. Choose `PHP Script`
 3. Choose your local file you want to debug
-4. Choose the PHP interpreter from the docker container
+4. Click on `...` next to the CLI interpreter
 5. Click on the `+` to create a new PHP CLI Interpreter
 6. Choose `From Docker, Vagrant, VM, WSL, Remote...`
-7. Choose `Docker`
-8. Create a new Docker server if you haven't configured one already
-9. Delete all path mappings here
+7. Choose `Docker Compose`
+8. Click on `New...` next to *Server* if you haven't created a Docker Server Configuration yet. Confirm with `OK`.
+10. Make sure to set the Interpreter to the created `web` CLI Interpreter.
 
-After that make sure you have the PHP CLI Interpreter configured to the docker container at `Settings - Languages & Frameworks - PHP`:
-![_docker/docs/interpreter.png](_docker/docs/xdebug-script-interpreter.png)
+After that make sure you **also** have the PHP CLI Interpreter configured to the docker container at `Settings - Languages & Frameworks - PHP`.
+Here you also have to configure the path mapping of your project root to the root inside the container (`/var/www/html`):
+![_docker/docs/xdebug-script-interpreter.png](_docker/docs/xdebug-script-interpreter.png)
 
-Now you can start debugging your PHP script by...
+Now you can start debugging your PHP script with...
 1. Setting a breakpoint in your PHP script:
 
    ![_docker/docs/xdebug-step1.png](_docker/docs/xdebug-step1.png)
-2. Listening to debug connections:
-
-   ![_docker/docs/xdebug-step2.png](_docker/docs/xdebug-step2.png)
-
-3. Start running the script with the debug button:
+2. Start running the script with the debug button:
 
    ![_docker/docs/xdebug-script-debug-button.png](_docker/docs/xdebug-script-debug-button.png)
 
@@ -252,7 +249,7 @@ Composer, npm and grunt is pre-installed in the `web` container.
 
 `composer install` and `npm install` is automatically executed at container startup if configured.
 
-If you want to manually execute another command, it is best to execute it **in** the container:
+If you want to manually execute another command, it is best to execute it **in** the `web` container:
 ```bash
 ./shell.cmd # go into container on unix/linux
 shell.cmd # go into container on windows
@@ -262,7 +259,6 @@ npm <any-npm-command>
 grunt
 <any-other-command>
 ```
-`COMPOSE_PROJECT_NAME` is defined in your `.env` file
 
 
 ### 11. Catch outgoing mails
@@ -553,9 +549,11 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] container entrance script independent of platform?
 * [x] support for php script xdebugging (e.g. via cake command class or classic script) -> PHPStorm: Languages & Frameworks - PHP -> CLI Interpreters; PHPStorm: Build, Execution, Deployment - Docker - add new Docker connection with path mapping
 * [x] progress output for initial .sql file import (working inside container; not working with `docker-compose up`)
-* [ ] php xdebug script with docker: db connection fails (see gkm.docker (cakephp) -> bin/cake.php next_delivery) (wrong path mapping? pwd -> /opt/project)
+* [x] php xdebug script with docker
+* [x] rename image + containers: <name>-web, <name>-db
 * [ ] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
 * [ ] test xdebug on linux and on macos
 * [ ] hint in documentation that `docker-compose down` will delete database in container (all changes gone)
-* [ ] rename image + containers: <name>-web, <name>-db
+* [ ] apache support for http2 (needs php-fpm) -> apache is faster
+* [ ] xdebug PHP script testing with xdebug < 3.X

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ -z "$COMPOSE_PROJECT_NAME" ]; then
-  echo "[ERROR]: startup.sh: required environment variable COMPOSE_PROJECT_NAME not set"
+if [ -z "$PROJECT_NAME" ]; then
+  echo "[ERROR]: startup.sh: required environment variable PROJECT_NAME not set"
   exit 1
 fi
 
