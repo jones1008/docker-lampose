@@ -73,7 +73,7 @@ To import **multiple** databases, add another `.sql` file and add more mapping v
 
 **Important**: If the container is already running, stop it, tear it down and start it again to trigger the import:
 ```shell
-docker-compose down
+docker-compose down   # Warning: this will delete your database inside the container
 docker-compose up
 ```
 
@@ -481,8 +481,16 @@ services:
 With Docker you want to match the environment of the server where the application will run later as close as possible.
 This helps prevent weird errors and bugs that only occur on the live system or only on your development system.
 
-Here are some additional tips to prevent them in the first place:
-1. 
+Here are some additional tips to prevent these discrepancies in the first place:
+1. Put as many files as possible into git where it makes sense. This way other developers do not have to copy single files from the live system
+   1. put `composer.lock` into git, so other developers have the exact same versions when they install dependencies with `composer install`.
+   2. put `.htaccess` to git if possible, so for example redirects are treated the same as on the live system.
+2. Replicate the `php.ini` configuration from the server as close as possible. You can configure your own `.ini` file in `_docker/web/additional-inis`.
+3. Install the same PHP version as used on the live system with the `FROM` command in the `_docker/web/Dockerfile`
+4. Install the same Composer version as used on the live system. 
+   This can prevent dependency installation problems. 
+   More information on how to install a specific composer version in the `_docker/web/Dockerfile` on here https://github.com/mlocati/docker-php-extension-installer#installing-composer
+5. Install all PHP extensions that are required by the application. This is also done in the `_docker/web/Dockerfile`
 
 ## Troubleshoot
 #### bash into container:
@@ -551,9 +559,8 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] progress output for initial .sql file import (working inside container; not working with `docker-compose up`)
 * [x] php xdebug script with docker
 * [x] rename image + containers: <name>-web, <name>-db
-* [ ] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
+* [x] xdebug PHP script testing with xdebug < 3.X
+* [x] hint in documentation that `docker-compose down` will delete database in container (all changes gone)
+* [x] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
 * [ ] test xdebug on linux and on macos
-* [ ] hint in documentation that `docker-compose down` will delete database in container (all changes gone)
-* [ ] apache support for http2 (needs php-fpm) -> apache is faster
-* [ ] xdebug PHP script testing with xdebug < 3.X
