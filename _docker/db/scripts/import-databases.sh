@@ -32,7 +32,7 @@ EOF
     echo "[INFO]: import-databases.sh: importing '$sqlFile' into database '$dbName'..."
 
     # output line by line progress of import
-    pv --numeric "$sqlFile" | mysql -u root "$dbName" --init-command="SET autocommit=0;"
+    (pv --force -p --name "Importing $sqlFile" "$sqlFile" | mysql -u root "$dbName" --init-command="SET autocommit=0;") 2>&1 | stdbuf -o0 tr '\r' '\n'
   else
     echo "[ERROR]: import-databases.sh: file $sqlFile for import not found"
   fi
