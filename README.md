@@ -485,6 +485,7 @@ Here are some additional tips to prevent these discrepancies in the first place:
 1. Put as many files as possible into git where it makes sense. This way other developers do not have to copy single files from the live system
    1. put `composer.lock` into git, so other developers have the exact same versions when they install dependencies with `composer install`.
    2. put `.htaccess` to git if possible, so for example redirects are treated the same as on the live system.
+   3. use the template files as explained above to automatically configure database configuration files that should not be in git.
 2. Replicate the `php.ini` configuration from the server as close as possible. You can configure your own `.ini` file in `_docker/web/additional-inis`.
 3. Install the same PHP version as used on the live system with the `FROM` command in the `_docker/web/Dockerfile`
 4. Install the same Composer version as used on the live system. 
@@ -562,5 +563,6 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] xdebug PHP script testing with xdebug < 3.X
 * [x] hint in documentation that `docker-compose down` will delete database in container (all changes gone)
 * [x] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
-* [ ] dockerize IFAA (Genesis World, ERP, Shop)
+* [ ] dockerize IFAA (Genesis World, ERP, Shop) -> merge https://github.com/OpenMage/magento-mirror into /shop?
+* [ ] MERGE_DIR script for IFAA magento 1 
 * [ ] test xdebug on linux and on macos
