@@ -571,7 +571,7 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] hint in documentation that `docker-compose down` will delete database in container (all changes gone)
 * [x] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [x] automate `git submodule update --init --recursive`
-* [ ] MERGE_DIR script for IFAA magento 1
+* [x] MERGE_DIR script for IFAA magento 1
 * [ ] npm and composer install in it's own script, not in startup.sh
-* [ ] dockerize IFAA (Genesis World, ERP, Shop) -> merge https://github.com/OpenMage/magento-mirror into /shop?
+* [ ] dockerize IFAA (Genesis World, ERP, Shop)
 * [ ] test xdebug on linux and on macOS

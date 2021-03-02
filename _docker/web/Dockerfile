@@ -78,3 +78,6 @@ RUN ln -s /usr/local/bin/php /usr/bin/php
 
 # install git for merge-dirs.sh and git-submodule-update.sh script
 RUN apt-get update && apt-get install -y git
+
+# install rsync and pv for clone-into.sh
+RUN apt-get update && apt-get install -y rsync

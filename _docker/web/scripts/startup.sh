@@ -25,6 +25,11 @@ if ! ./_docker/web/scripts/git-submodule-update.sh; then
   exit 1
 fi
 
+# call git-submodule-update.sh
+if ! ./_docker/web/scripts/clone-into.sh; then
+  exit 1
+fi
+
 wd=$(pwd)
 
 # run composer install for each specified path
