@@ -19,6 +19,7 @@ services:
       WKHTMLTOPDF_BINARY: "/usr/bin/wkhtmltopdf"
       COMPOSER_INSTALL_PATHS: ./
       #NPM_INSTALL_PATHS: ./
+      #CONTAINS_GIT_SUBMODULES: "false"
     env_file:
       - .env
       - _docker/public.env

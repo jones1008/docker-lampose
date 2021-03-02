@@ -12,13 +12,6 @@ The current directory will be available in the `/var/www/html` directory of the 
 The `db` container runs Alpine Linux (very small Linux).
 It holds the database server and is therefore responsible for managing database connection etc. 
 
-## Prefix Notes
-### Git submodules
-If your application has **git submodules** make sure to pull them first. 
-If you have a `.gitmodules` file in your root directory you will probably want to do this. 
-```shell
-git submodule update --init --recursive
-```
 
 # Configure and run the dockerized application:
 
@@ -475,9 +468,23 @@ services:
          args:
             INSTALL_LOCALES: "de_DE, fr_FR"
 ```
-`INSTALL_LOCALES` takes a string separated with `,` for multiple locales as input.  
+`INSTALL_LOCALES` takes a string separated with `,` for multiple locales as input.
 
-### 9. Match your server setup
+### 9. Git submodules
+If your application has any git submodules (sub repositories) you can automatically update/pull them at startup with changing your `docker-compose.yml` to:
+```yaml
+services:
+   web:
+      environment:
+         CONTAINS_GIT_SUBMODULES: "true"
+```
+This will execute `git submodule update --init --recursive`.
+
+This is also executed automatically if you have a `.gitmodules` file in your root directory. 
+
+To disable, set `CONTAINS_GIT_SUBMODULES` to `"false"`
+
+### 10. Match your server setup
 With Docker you want to match the environment of the server where the application will run later as close as possible.
 This helps prevent weird errors and bugs that only occur on the live system or only on your development system.
 
@@ -563,6 +570,8 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] xdebug PHP script testing with xdebug < 3.X
 * [x] hint in documentation that `docker-compose down` will delete database in container (all changes gone)
 * [x] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
+* [x] automate `git submodule update --init --recursive`
+* [ ] MERGE_DIR script for IFAA magento 1
+* [ ] npm and composer install in it's own script, not in startup.sh
 * [ ] dockerize IFAA (Genesis World, ERP, Shop) -> merge https://github.com/OpenMage/magento-mirror into /shop?
-* [ ] MERGE_DIR script for IFAA magento 1 
-* [ ] test xdebug on linux and on macos
+* [ ] test xdebug on linux and on macOS
