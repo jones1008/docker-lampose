@@ -1,8 +1,5 @@
 #!/bin/bash
 
-wd=$(pwd)
-cd "$wd"
-
 sourceRoot=./_docker/web/templates
 
 # loop over all Environment variables that start with "TEMPLATE_"

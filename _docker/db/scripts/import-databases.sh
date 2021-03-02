@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /sql-files
+cd /sql-files || exit 1
 
 prefix=DATABASE_
 
