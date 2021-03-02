@@ -75,3 +75,6 @@ RUN /build-scripts/install-locales.sh "$INSTALL_LOCALES"
 
 # link php binary to /usr/bin/php for compatibility
 RUN ln -s /usr/local/bin/php /usr/bin/php
+
+# install git for merge-dirs.sh and git-submodule-update.sh script
+RUN apt-get update && apt-get install -y git
