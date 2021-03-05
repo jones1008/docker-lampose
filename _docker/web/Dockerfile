@@ -21,6 +21,7 @@ RUN install-php-extensions pdo_mysql    # for mysqli connections
 RUN install-php-extensions mysqli       # requires php7.0 or higher
 RUN install-php-extensions intl
 RUN install-php-extensions gd
+RUN install-php-extensions exif
 #RUN install-php-extensions zip
 #RUN install-php-extensions imagick      # warning: this is huge
 #...
@@ -44,10 +45,12 @@ RUN if [ "$INSTALL_NPM" = "true" ]; then \
         && apt-get install -y nodejs \
     ;fi
 
-# install grunt-cli
+# install grunt-cli and sass
 ARG INSTALL_GRUNT="false"
 RUN if [ "$INSTALL_GRUNT" = "true" ] &&  [ "$INSTALL_NPM" = "true" ]; then \
-        npm install -g grunt-cli \
+           npm install -g grunt-cli \
+        && apt-get update && apt-get install -y ruby-full \
+        && gem install sass \
     ;fi
 
 # install wkhtmltopdf (https://wkhtmltopdf.org/)

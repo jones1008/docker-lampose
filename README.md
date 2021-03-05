@@ -484,7 +484,10 @@ This is also executed automatically if you have a `.gitmodules` file in your roo
 
 To disable, set `CONTAINS_GIT_SUBMODULES` to `"false"`
 
-### 10. Match your server setup
+### 10. Automatically clone remote into sub directory
+
+
+### 11. Match your server setup
 With Docker you want to match the environment of the server where the application will run later as close as possible.
 This helps prevent weird errors and bugs that only occur on the live system or only on your development system.
 
@@ -574,4 +577,10 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] MERGE_DIR script for IFAA magento 1
 * [ ] npm and composer install in it's own script, not in startup.sh
 * [ ] dockerize IFAA (Genesis World, ERP, Shop)
+* [ ] make npm run serve output available outside of container (bti-brandschutz) -> npm port is not always the same
 * [ ] test xdebug on linux and on macOS
+* [ ] make more configurable in .env files, so docker-compose.yml and Dockerfiles can be exchanged at any time for updates (php extensions, composer version) | config and src directory/files? or automatic update process?
+* [ ] create valid certificate instead of self signed -> letsencrypt?
+* [ ] install-locales and install-xdebug in Dockerfile (https://github.com/mlocati/docker-php-extension-installer#installing-specific-versions-of-an-extension)
+* [ ] problem with template-script: if file is in git and other changes are made on that file, it needs to be edited in the template too
+* [ ] git submodule update error nicht anzeigen, wenn uncommittete Änderung stört
