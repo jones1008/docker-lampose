@@ -1,5 +1,7 @@
 #!/bin/bash
 
+wd=$(pwd)
+
 if [ -z "$PROJECT_NAME" ]; then
   echo "[ERROR]: startup.sh: required environment variable PROJECT_NAME not set"
   exit 1
@@ -30,26 +32,9 @@ if ! ./_docker/web/scripts/clone-into.sh; then
   exit 1
 fi
 
-wd=$(pwd)
-
-# run composer install for each specified path
-if [ -n "$COMPOSER_INSTALL_PATHS" ]; then
-  for path in $(echo "$COMPOSER_INSTALL_PATHS" | tr ':' ' '); do
-    cd "$wd" || exit 1
-    cd "$path" || exit 1
-    echo "[INFO]: COMPOSER: executing composer install in $path"
-    composer install
-  done
-fi
-
-# run npm install for each specified path
-if [ -n "$NPM_INSTALL_PATHS" ]; then
-  for path in $(echo "$NPM_INSTALL_PATHS" | tr ':' ' '); do
-    cd "$wd" || exit 1
-    cd "$path" || exit 1
-    echo "[INFO]: NPM: executing npm install in $path"
-    npm install --no-update-notifier
-  done
+# call composer-npm-install.sh
+if ! ./_docker/web/scripts/composer-npm-install.sh; then
+  exit 1
 fi
 
 # call catch-mail.sh
@@ -64,10 +49,9 @@ if [ -n "$CATCH_MAIL" ] && [ "$CATCH_MAIL" = "true" ]; then
     echo "All catched mails available at http://$DOMAIN:$CATCH_MAIL_PORT"
 fi
 
-
-# start application
 cd "$wd" || exit 1
 
+# start application
 sleep 1 && \
 httpDomain="http://$DOMAIN" && \
 httpsDomain="https://$DOMAIN" && \
