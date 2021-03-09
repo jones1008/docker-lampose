@@ -1,4 +1,5 @@
-FROM php:7.4-apache
+ARG PHP_VERSION=7.4
+FROM php:${PHP_VERSION}-apache
 
 # use german mirrors for increased apt install and update speeds
 COPY ./sources.list /etc/apt/sources.list
@@ -27,37 +28,46 @@ RUN install-php-extensions exif
 #...
 
 
-# install correct xdebug version with script (https://xdebug.org/)
-RUN /build-scripts/install-xdebug.sh && docker-php-ext-enable xdebug
-
+# install correct xdebug version dependent on PHP version (see https://xdebug.org/docs/compat and https://web.archive.org/web/20191207092254/https://xdebug.org/docs/compat)
+RUN if [ $(printf '%s\n' 7.2 "$PHP_VERSION" | sort -V | head -n1) = "7.2" ]; then \
+        install-php-extensions xdebug-^3; \
+    elif [ $(printf '%s\n' 7.0 "$PHP_VERSION" | sort -V | head -n1) = "7.0" ]; then \
+        install-php-extensions xdebug-^2.7; \
+    elif [ $(printf '%s\n' 5.6 "$PHP_VERSION" | sort -V | head -n1) = "5.6" ]; then \
+        install-php-extensions xdebug-^2.5; \
+    elif [ $(printf '%s\n' 5.4 "$PHP_VERSION" | sort -V | head -n1) = "5.4" ]; then \
+        install-php-extensions xdebug-^2.4; \
+    else \
+      echo "[ERROR] while trying to install xdebug: invalid or too old PHP version: $PHP_VERSION"; \
+    fi
 
 # install composer (more info on composer installation: https://github.com/mlocati/docker-php-extension-installer#installing-composer)
 ARG INSTALL_COMPOSER="true"
 RUN if [ "$INSTALL_COMPOSER" = "true" ]; then \
-        install-php-extensions @composer && apt-get update && apt-get install -y unzip git \
-    ;fi
+        install-php-extensions @composer && apt-get update && apt-get install -y unzip git; \
+    fi
 
 # install npm
 ARG INSTALL_NPM="false"
 RUN if [ "$INSTALL_NPM" = "true" ]; then \
            apt-get update && apt-get install -y curl \
         && curl -sL https://deb.nodesource.com/setup_lts.x | bash - \
-        && apt-get install -y nodejs \
-    ;fi
+        && apt-get install -y nodejs; \
+    fi
 
 # install grunt-cli and sass
 ARG INSTALL_GRUNT="false"
 RUN if [ "$INSTALL_GRUNT" = "true" ] &&  [ "$INSTALL_NPM" = "true" ]; then \
            npm install -g grunt-cli \
         && apt-get update && apt-get install -y ruby-full \
-        && gem install sass \
-    ;fi
+        && gem install sass; \
+    fi
 
 # install wkhtmltopdf (https://wkhtmltopdf.org/)
 ARG INSTALL_WKHTMLTOPDF="false"
 RUN if [ "$INSTALL_WKHTMLTOPDF" = "true" ]; then \
-       DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y --no-install-recommends wkhtmltopdf \
-    ;fi
+       DEBIAN_FRONTEND=noninteractive && apt-get update && apt-get install -y --no-install-recommends wkhtmltopdf; \
+    fi
 
 # setup mail catcher (iptables and mailhog)
 RUN apt-get update && apt-get install -y iptables
@@ -74,7 +84,14 @@ RUN echo "ServerName localhost" | tee /etc/apache2/conf-available/fqdn.conf && a
 
 # install wanted locales, so PHPs `setlocale(LC_ALL, 'de_DE.UTF-8')` will work
 ARG INSTALL_LOCALES=""
-RUN /build-scripts/install-locales.sh "$INSTALL_LOCALES"
+RUN if [ -n "$INSTALL_LOCALES" ]; then \
+      apt-get update && apt-get install -y locales; \
+      for locale in $(echo "$INSTALL_LOCALES" | tr ',' ' '); do \
+        echo "${locale}.UTF-8 UTF-8" >> /etc/locale.gen; \
+      done; \
+      locale-gen; \
+    fi
+
 
 # link php binary to /usr/bin/php for compatibility
 RUN ln -s /usr/local/bin/php /usr/bin/php

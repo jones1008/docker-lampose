@@ -293,7 +293,8 @@ To specify the **PHP version** change the `FROM` command in `./_docker/web/Docke
 
 e.g. for PHP version 5.6:
 ```dockerfile
-FROM php:5.6-apache
+ARG PHP_VERSION=5.6
+FROM php:${PHP_VERSION}-apache
 ```
 After that make sure to build this container again (see Note 1 above)
 
