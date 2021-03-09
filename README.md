@@ -396,7 +396,6 @@ services:
         INSTALL_COMPOSER: "true"
 ```
 
-
 It runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
 ```yaml
 services:
@@ -416,7 +415,6 @@ If you need another composer version installed (for example `1.x`) you can chang
 RUN install-php-extensions @composer-1 && apt-get update && apt-get install -y unzip git
 ```
 More info on this on https://github.com/mlocati/docker-php-extension-installer#installing-composer
-
 
 ### 6. Run `npm install` at startup
 Node.js and `npm` is installed if you define it as a build argument in the `docker-compose.yml`:
@@ -442,8 +440,19 @@ If you need to execute `npm install` in multiple paths you can do this by separa
 NPM_INSTALL_PATHS: ./path:./another/path
 ```
 
+### 7. Access other applications from the container
+If you need to access other applications from the outside that run inside the container, you need make the port available on the outside.
 
-### 7. Install wkhtmltopdf
+For example, if you run a Vue.js application with `npm run serve` and this application runs *inside* the container on `http://localhost:8080`,
+you can make this available on the outside under `http://<DOMAIN>:8080` if you add this to your `docker-compose.yml`:
+```yaml
+services:
+  web:
+    ports:
+      - "${EXTERNAL_IP:-127.255.255.254}:8080:8080"
+```
+
+### 8. Install wkhtmltopdf
 If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
 ```yaml
 services:
@@ -456,7 +465,7 @@ After that you have to rebuild the container (see Note 1)
 
 The binary path is stored in the environment variable `WKHTMLTOPDF_BINARY` available in the `web` container
 
-### 8. Locales
+### 9. Locales
 If you have to install one or more locales in the `web` container, so for example the following PHP function will work... :
 ```php
 setlocale(LC_ALL, 'de_DE.UTF-8');
@@ -471,7 +480,7 @@ services:
 ```
 `INSTALL_LOCALES` takes a string separated with `,` for multiple locales as input.
 
-### 9. Git submodules
+### 10. Git submodules
 If your application has any git submodules (sub repositories) you can automatically update/pull them at startup with changing your `docker-compose.yml` to:
 ```yaml
 services:
@@ -485,10 +494,20 @@ This is also executed automatically if you have a `.gitmodules` file in your roo
 
 To disable, set `CONTAINS_GIT_SUBMODULES` to `"false"`
 
-### 10. Automatically clone remote into sub directory
+### 11. Automatically clone remote into sub directory
+If you want to automatically add extra needed files, that you normally would copy manually from the live server
+and that are available in a public git repository, you can specify the environment variable `CLONE_INTO_<SUFFIX>`
+in the `docker-compose.yml`:
+```yaml
+services:
+  web:
+    environment:
+       CLONE_INTO_SAMPLE: "./sub-directory:github.com/sample/sample.git"  # Warning: git repo link needs to be without 'http://'
+```
+When starting the container this will clone the public repository `github.com/sample/sample.git` in the background 
+and copy it's content to `./sub-directory` **without** the hidden `.git` folder.
 
-
-### 11. Match your server setup
+### 12. Match your server setup
 With Docker you want to match the environment of the server where the application will run later as close as possible.
 This helps prevent weird errors and bugs that only occur on the live system or only on your development system.
 
@@ -504,13 +523,14 @@ Here are some additional tips to prevent these discrepancies in the first place:
    More information on how to install a specific composer version in the `_docker/web/Dockerfile` on here https://github.com/mlocati/docker-php-extension-installer#installing-composer
 5. Install all PHP extensions that are required by the application. This is also done in the `_docker/web/Dockerfile`
 
+
 ## Troubleshoot
 #### bash into container:
 To go into a container simply run the `shell` script with it's two optional parameters.
 
-The *first parameter* is the corresponding docker service name of the container (for example `db`). The default is `web`.
+- The *first parameter* is the corresponding docker service name of the container (for example `db`). The default is `web`.
 
-The *second parameter* is the shell entry point (for example `/bin/sh`). The default is `/bin/bash`.
+- The *second parameter* is the shell entry point (for example `/bin/sh`). The default is `/bin/bash`.
 
 ```shell
 # on unix/linux:
@@ -576,12 +596,14 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
 * [x] automate `git submodule update --init --recursive`
 * [x] MERGE_DIR script for IFAA magento 1
-* [ ] npm and composer install in it's own script, not in startup.sh
-* [ ] dockerize IFAA (Genesis World, ERP, Shop)
-* [ ] make npm run serve output available outside of container (bti-brandschutz) -> npm port is not always the same
-* [ ] test xdebug on linux and on macOS
+* [x] npm and composer install in it's own script, not in startup.sh
+* [x] install-locales and install-xdebug in Dockerfile (https://github.com/mlocati/docker-php-extension-installer#installing-specific-versions-of-an-extension) -> better caching
+* [x] make npm run serve output available outside of container (bti-brandschutz) -> npm port is not always the same
+* [x] clone-into.sh documentation
 * [ ] make more configurable in .env files, so docker-compose.yml and Dockerfiles can be exchanged at any time for updates (php extensions, composer version) | config and src directory/files? or automatic update process?
-* [ ] create valid certificate instead of self signed -> letsencrypt?
-* [ ] install-locales and install-xdebug in Dockerfile (https://github.com/mlocati/docker-php-extension-installer#installing-specific-versions-of-an-extension)
+* [ ] create valid certificate instead of self signed -> letsencrypt? -> for testing of service worker (bti-brandschutz)
 * [ ] problem with template-script: if file is in git and other changes are made on that file, it needs to be edited in the template too
-* [ ] git submodule update error nicht anzeigen, wenn uncommittete Änderung stört
+* [ ] git submodule update error nicht anzeigen, wenn uncommittete Änderung stört (bti-brandschutz?)
+* [ ] test xdebug on linux (Marius or Timo) and on macOS (???)
+* [ ] dockerize IFAA (Genesis World, ERP, Shop) (-> clone-into.sh: support for ftp and git with authentication) 
+* [ ] updaten: gkm-auftragsverwaltung, bti-brandschutz
