@@ -626,6 +626,9 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] switch to default tld `.local` instead of `.docker`
 * [x] when starting multiple docker container, there is a problem with port allocation with EXTERNAL_IP
 * [ ] test xdebug AND install-cert.cmd on linux (Marius or Timo) and on macOS (Johannes? Jana? Anna-Lisa?)
-* [ ] try https://github.com/drud/ddev with ifaa? 
+* [ ] test valid certificate with wsl2 docker backend (https://ddev.readthedocs.io/en/latest/#installation-or-upgrade-windows-wsl2  step 5)
 * [ ] dockerize IFAA (Genesis World, ERP, Shop) (-> clone-into.sh: support for ftp and git with authentication)
 * [ ] updaten: gkm-auftragsverwaltung, bti-brandschutz
+
+# IMPORTANT:
+* [ ] try https://github.com/drud/ddev with ifaa on linux (might replace this repo)
