@@ -1,1 +1,2 @@
 db/**/*.sql
+web/certs/*.pem

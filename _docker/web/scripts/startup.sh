@@ -51,6 +51,19 @@ fi
 
 cd "$wd" || exit 1
 
+# enable ssl only when HTTPS env variable is set
+if apache2ctl -M | grep -q ssl_module; then
+  # ssl is enabled
+  if [ -z "$HTTPS" ] || [ "$HTTPS" = "false" ]; then
+    a2dismod --quiet ssl  # disable ssl
+  fi
+else
+  # ssl is not enabled
+  if [ "$HTTPS" = "true" ]; then
+    a2enmod --quiet ssl  # enable ssl
+  fi
+fi
+
 # start application
 sleep 1 && \
 httpDomain="http://$DOMAIN" && \
@@ -58,10 +71,13 @@ httpsDomain="https://$DOMAIN" && \
 if [ -n "$WEB_PORT" ]; then \
   httpDomain="$httpDomain:$WEB_PORT"; \
 fi && \
-if [ -n "$WEB_PORT_SSL" ]; then \
-  httpsDomain="$httpsDomain:$WEB_PORT_SSL"; \
+if [ "$HTTPS" = "true" ]; then \
+  if [ -n "$WEB_PORT_SSL" ]; then \
+    httpsDomain="$httpsDomain:$WEB_PORT_SSL"; \
+  fi && \
+  echo "application started at $httpsDomain"; \
 fi && \
-echo "application started with self-signed certificate at $httpsDomain and without at $httpDomain" && \
+echo "application started at $httpDomain" && \
 if [ -n "$EXTERNAL_IP" ]; then \
   externalDomain="http://$EXTERNAL_IP"; \
   if [ -n "$WEB_PORT" ]; then \

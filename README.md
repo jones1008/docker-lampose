@@ -119,7 +119,15 @@ You can configure your `DOMAIN` in `.env` file. Make sure to restart the contain
 DOMAIN=test.local
 ```
 #### https
-The application is also available at `https://<DOMAIN>:<WEB_PORT_SSL>` per default.
+If you need the application available through https, you need to set `HTTPS=true` in your `.env` file and
+create a certificate with the `install-cert.cmd <DOMAIN>` script. This script works on Windows, macOS and Linux.
+
+After that, you need to restart your containers and then you can access your application at `https://<DOMAIN>:<WEB_PORT_SSL>`.
+
+If you need to access it on Firefox, you first need to import the RootCA certificate in the certificate settings of Firefox (see screenshot). 
+The `install-cert.cmd` tells you the location of this certificate file called `rootCA.pem`.
+
+![_docker/docs/firefox-import-rootca.png](_docker/docs/firefox-import-rootca.png)
 
 #### On the network
 If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` in your `.env` 
@@ -600,10 +608,11 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] install-locales and install-xdebug in Dockerfile (https://github.com/mlocati/docker-php-extension-installer#installing-specific-versions-of-an-extension) -> better caching
 * [x] make npm run serve output available outside of container (bti-brandschutz) -> npm port is not always the same
 * [x] clone-into.sh documentation
-* [ ] make more configurable in .env files, so docker-compose.yml and Dockerfiles can be exchanged at any time for updates (php extensions, composer version) | config and src directory/files? or automatic update process?
-* [ ] create valid certificate instead of self signed -> letsencrypt? -> for testing of service worker (bti-brandschutz)
-* [ ] problem with template-script: if file is in git and other changes are made on that file, it needs to be edited in the template too
-* [ ] git submodule update error nicht anzeigen, wenn uncommittete Änderung stört (bti-brandschutz?)
-* [ ] test xdebug on linux (Marius or Timo) and on macOS (???)
-* [ ] dockerize IFAA (Genesis World, ERP, Shop) (-> clone-into.sh: support for ftp and git with authentication) 
+* [x] create valid certificate instead of self signed -> mkcert script? -> for testing of service worker (bti-brandschutz)
+* [x] firefox windows documentation for valid certificates
+* [x] switch to default tld `.local` instead of `.docker`
+* [x] when starting multiple docker container, there is a problem with port allocation with EXTERNAL_IP
+* [ ] test xdebug on linux (Marius or Timo) and on macOS (Johannes? Jana? Anna-Lisa?)
+* [ ] try https://github.com/drud/ddev with ifaa? 
+* [ ] dockerize IFAA (Genesis World, ERP, Shop) (-> clone-into.sh: support for ftp and git with authentication)
 * [ ] updaten: gkm-auftragsverwaltung, bti-brandschutz
