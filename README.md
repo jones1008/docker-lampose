@@ -37,7 +37,7 @@ LOOPBACK_IP=127.0.0.2
 ___
 Set a custom domain where your application will be available at:
 ```dotenv
-DOMAIN=test.docker
+DOMAIN=test.local
 ```
 ___
 Set the absolute path to your `hosts` file on your OS:
@@ -385,7 +385,7 @@ The resulting file `./path/to/application/database_config.php` can be for exampl
 <?php
 return [
     "database" => [
-        "host" => 'test.docker',
+        "host" => 'test.local',
         "user" => 'some_user',
         "password" => 's3cr3tP4ssw0rd',
         "database_name" => 'some_db_name' 
@@ -612,7 +612,7 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 * [x] firefox windows documentation for valid certificates
 * [x] switch to default tld `.local` instead of `.docker`
 * [x] when starting multiple docker container, there is a problem with port allocation with EXTERNAL_IP
-* [ ] test xdebug on linux (Marius or Timo) and on macOS (Johannes? Jana? Anna-Lisa?)
+* [ ] test xdebug AND install-cert.cmd on linux (Marius or Timo) and on macOS (Johannes? Jana? Anna-Lisa?)
 * [ ] try https://github.com/drud/ddev with ifaa? 
 * [ ] dockerize IFAA (Genesis World, ERP, Shop) (-> clone-into.sh: support for ftp and git with authentication)
 * [ ] updaten: gkm-auftragsverwaltung, bti-brandschutz
