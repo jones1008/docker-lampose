@@ -130,12 +130,25 @@ The `install-cert.cmd` tells you the location of this certificate file called `r
 ![_docker/docs/firefox-import-rootca.png](_docker/docs/firefox-import-rootca.png)
 
 #### On the network
-If you want to access your application from **another device on the same network**, set `EXTERNAL_IP` in your `.env` 
-file to the IP your computer has on the corresponding network interface. **For example**:
-```dotenv
-EXTERNAL_IP=192.168.178.54
+If you want to access your application from **another device on the same network**, you have to set up a new port mapping 
+with the **IP your computer has on the corresponding network interface** (for example `192.168.178.54`).
+
+Do this in a new file called `docker-compose.override.yml` in your project root:
+```yaml
+services:
+  web:
+    ports:
+      - "192.168.178.54:${WEB_PORT:-80}:80"
 ```
 After you restarted your container, the application will be available at `http://192.168.178.54:<WEB_PORT>` on the network you are connected to.
+
+To disable this again comment out this line **and** the `ports:` line:
+```yaml
+services:
+  web:
+    #ports:
+      #- "192.168.178.54:${WEB_PORT:-80}:80"
+```
 
 ### 8. Xdebug Configuration
 Xdebug is **installed and enabled by default** and is ready to use.
@@ -457,7 +470,7 @@ you can make this available on the outside under `http://<DOMAIN>:8080` if you a
 services:
   web:
     ports:
-      - "${EXTERNAL_IP:-127.255.255.254}:8080:8080"
+      - "${LOOPBACK_IP:-127.255.255.254}:8080:8080"
 ```
 
 ### 8. Install wkhtmltopdf
