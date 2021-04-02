@@ -1,19 +1,295 @@
-# Docker Development Setup
+# docker-lampose
 
-# Intro: What is this Docker setup?
+docker-lampose is a template for a LAMP stack development environment running in docker and utilizing `docker-compose`.
 
-This Docker development setup is mainly setup with the `docker-compose.yml` file. 
-It creates two containers at startup (`web` and `db`).
+The main purpose of this template is to automate the startup of PHP projects as far as possible, so you can quickly work on *them features* of your application.
 
-The `web` container runs Debian (Linux) and is responsible for the web application.
-The current directory will be available in the `/var/www/html` directory of the web application.
+>**Disclaimer**: This project is not stable! You rather might want to use [ddev-local](https://www.ddev.com/ddev-local/) instead.
+> Although some bash scripts of this repo might be helpful.
+> 
+> *Also*: docker-lampose is currently only tested on Windows.
+
+## Features:
+
+- local hosting under custom domain (e.g. `https://project.local`) for your PHP project
+- database import of multiple databases on initial startup into `db` container
+- easy debugging of browser applications, PHP scripts and remote debug connections with preconfigured `xdebug`
+- `composer install` and `npm install` on startup in configured directories
+- catches outgoing mails and redirects them to a local mail server, so you want accidentally send mails to anyone while testing.
+- creation of a locally trusted certificate for `https` connection
+- use environment variables from the `.env` file in git ignored files for even more automation
+- automatic pulling of existing git submodules
+- automatic pulling of remote git into specific sub directory without the `.git` folder
+- script to get into the docker container more easily
+- a good documentation
+
+# Usage:
+
+## Dockerize your application:
+
+### 0. Merge docker-lampose into your application:
+Pull this repository and place all of its files in the root directory of your project.
+
+Then make sure to add the following to your `.gitignore` file in your root directory:
+```ignore
+.env
+docker-compose.override.yml
+```
+
+### 1. PHP setup
+To specify the **PHP version** change the `FROM` command in `./_docker/web/Dockerfile`
+
+e.g. for PHP version 5.6:
+```dockerfile
+ARG PHP_VERSION=5.6
+FROM php:${PHP_VERSION}-apache
+```
+After that make sure to build this container again with `docker-compose build`.
+
+#### PHP Extensions:
+To install and enable **PHP extensions** add them to `./_docker/web/Dockerfile`.
+```dockerfile
+RUN install-php-extensions <extensionname>
+```
+If this did not work try this:
+```dockerfile
+RUN docker-php-ext-install <extensionname>
+```
+All available extensions see here: https://github.com/mlocati/docker-php-extension-installer#supported-php-extensions
+
+More information on https://hub.docker.com/_/php/ at *How to install more PHP extensions*
+
+#### Config:
+To edit any `php.ini` config, just add another `.ini` file to `_docker/web/additional-inis/`
 
 
-The `db` container runs Alpine Linux (very small Linux).
-It holds the database server and is therefore responsible for managing database connection etc. 
+### 2. Webserver Setup
+If you need to set the root directory of your web application other than `./`
+(for example `/webroot`) set it in `_docker/web/sites-available/000-default.conf`:
+```apacheconf
+# ...
+DocumentRoot /var/www/html/webroot
+```
+
+### 3. Database configuration
+If you need to configure some database parameters (for example `innodb_file_format`), you can do that in the `_docker/db/my.cnf` file.
 
 
-# Configure and run the dockerized application:
+### 4. Custom application configuration files
+If you have a git ignored file (for example a `database_config.php`) in your application that normally needs to be edited,
+you can define a template file, that reduces further configuration of the Docker user.
+
+At container startup all environment variable occurrences within this file will be set to the corresponding value and
+copied to the defined location.
+
+To do this, first set a file mapping in your `docker-compose.yml` as an environment variable with the prefix `TEMPLATE_`:
+```yaml
+services:
+  web:
+    environment:
+      TEMPLATE_DB_CONFIG: "database_config.php:./path/to/application/database_config.php"
+```
+In `_docker/web/templates/` define your configuration template file like this (in this case `database_config.php`):
+```php
+<?php
+return [
+    "database" => [
+        "host" => '${DOMAIN}',
+        "user" => '${DATABASE_USER_MAIN}',
+        "password" => '${DATABASE_PASS_MAIN}',
+        "database_name" => '${DATABASE_NAME_MAIN}'
+    ],
+    'wkhtmltopdfBinary' => '${WKHTMLTOPDF_BINARY}'
+];
+```
+This also supports the bash default syntax with `:-` between variable name and default value:
+```bash
+${DOMAIN:-test.local}
+```
+If the environment variable `DOMAIN` is not set, this will default to `test.local`
+
+The variables `DATABASE_USER_MAIN` and `DATABASE_PASS_MAIN` should be set in the `_docker/public.env`.
+If you have more databases set these variables with a different suffix than `_MAIN`:
+```dotenv
+DATABASE_USER_MAIN="some_user"
+DATABASE_PASS_MAIN="s3cr3tP4ssw0rd"
+DATABASE_USER_SOMEOTHERSUFFIX="another_user"
+DATABASE_PASS_SOMEOTHERSUFFIX="sauce"
+```
+
+In this case the literal environment variables in the file `_docker/web/templates/database_config.php` will be replaced
+with the corresponding environment value and then the file will be copied to `./path/to/application/database_config.php`.
+
+The resulting file `./path/to/application/database_config.php` can be for example:
+```php
+<?php
+return [
+    "database" => [
+        "host" => 'test.local',
+        "user" => 'some_user',
+        "password" => 's3cr3tP4ssw0rd',
+        "database_name" => 'some_db_name' 
+    ],
+    "wkhtmltopdfBinary" => '/usr/bin/wkhtmltopdf'
+];
+```
+
+### 5. Install Composer
+Composer is installed in its latest version if you define it as a build argument in the `docker-compose.yml`:
+```yaml
+services:
+  web:
+    build:
+      args:
+        INSTALL_COMPOSER: "true"
+```
+
+It runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
+```yaml
+services:
+  web:
+    # ...
+    environment:
+      COMPOSER_INSTALL_PATHS: ./
+```
+If you need to execute `composer install` in multiple paths you can do this by separating them by a `:`:
+```yaml
+COMPOSER_INSTALL_PATHS: ./path:./another/path
+```
+
+If you need another composer version installed (for example `1.x`) you can change this in the `Dockerfile` under `_docker/web/`:
+```dockerfile
+# install composer
+RUN install-php-extensions @composer-1 && apt-get update && apt-get install -y unzip git
+```
+More info on this on https://github.com/mlocati/docker-php-extension-installer#installing-composer
+
+### 6. Run `npm install` at startup
+Node.js and `npm` is installed if you define it as a build argument in the `docker-compose.yml`:
+```yaml
+services:
+  web:
+    build:
+      args:
+        INSTALL_NPM: "true"
+```
+The same goes for the installation of `grunt` with the build argument `INSTALL_GRUNT`.
+
+If installed it automatically runs `npm install` in the directory you specified with:
+```yaml
+services:
+  web:
+    # ...
+    environment:
+      NPM_INSTALL_PATHS: ./path/to/sub/dir
+```
+If you need to execute `npm install` in multiple paths you can do this by separating them by a `:`:
+```yaml
+NPM_INSTALL_PATHS: ./path:./another/path
+```
+
+### 7. Access other applications from the container
+If you need to access other applications from the outside that run inside the container, you need make the port available on the outside.
+
+For example, if you run a Vue.js application with `npm run serve` and this application runs *inside* the container on `http://localhost:8080`,
+you can make this available on the outside under `http://<DOMAIN>:8080` if you add this to your `docker-compose.yml`:
+```yaml
+services:
+  web:
+    ports:
+      - "${LOOPBACK_IP:-127.255.255.254}:8080:8080"
+```
+
+### 8. Install wkhtmltopdf
+If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
+```yaml
+services:
+  web:
+    build:
+      args:
+        INSTALL_WKHTMLTOPDF: "true"
+```
+After that you have to rebuild the container (see Note 1)
+
+The binary path is stored in the environment variable `WKHTMLTOPDF_BINARY` available in the `web` container
+
+### 9. Locales
+If you have to install one or more locales in the `web` container, so for example the following PHP function will work... :
+```php
+setlocale(LC_ALL, 'de_DE.UTF-8');
+``` 
+... you can add it to the `web` service as a build argument in the `docker-compose.yml`:
+```yaml
+services:
+   web:
+      build:
+         args:
+            INSTALL_LOCALES: "de_DE, fr_FR"
+```
+`INSTALL_LOCALES` takes a string separated with `,` for multiple locales as input.
+
+### 10. Git submodules
+If your application has any git submodules (sub repositories) you can automatically update/pull them at startup with changing your `docker-compose.yml` to:
+```yaml
+services:
+   web:
+      environment:
+         CONTAINS_GIT_SUBMODULES: "true"
+```
+This will execute `git submodule update --init --recursive`.
+
+This is also executed automatically if you have a `.gitmodules` file in your root directory.
+
+To disable, set `CONTAINS_GIT_SUBMODULES` to `"false"`
+
+### 11. Automatically clone remote into sub directory
+If you want to automatically add extra needed files, that you normally would copy manually from the live server
+and that are available in a public git repository, you can specify the environment variable `CLONE_INTO_<SUFFIX>`
+in the `docker-compose.yml`:
+```yaml
+services:
+  web:
+    environment:
+       CLONE_INTO_SAMPLE: "./sub-directory:github.com/sample/sample.git"  # Warning: git repo link needs to be without 'http://'
+```
+When starting the container this will clone the public repository `github.com/sample/sample.git` in the background
+and copy it's content to `./sub-directory` **without** the hidden `.git` folder.
+
+### 12. Match your server setup
+With Docker you want to match the environment of the server where the application will run later as close as possible.
+This helps prevent weird errors and bugs that only occur on the live system or only on your development system.
+
+Here are some additional tips to prevent these discrepancies in the first place:
+1. Put as many files as possible into git where it makes sense. This way other developers do not have to copy single files from the live system
+   1. put `composer.lock` into git, so other developers have the exact same versions when they install dependencies with `composer install`.
+   2. put `.htaccess` to git if possible, so for example redirects are treated the same as on the live system.
+   3. use the template files as explained above to automatically configure database configuration files that should not be in git.
+2. Replicate the `php.ini` configuration from the server as close as possible. You can configure your own `.ini` file in `_docker/web/additional-inis`.
+3. Install the same PHP version as used on the live system with the `FROM` command in the `_docker/web/Dockerfile`
+4. Install the same Composer version as used on the live system.
+   This can prevent dependency installation problems.
+   More information on how to install a specific composer version in the `_docker/web/Dockerfile` on here https://github.com/mlocati/docker-php-extension-installer#installing-composer
+5. Install all PHP extensions that are required by the application. This is also done in the `_docker/web/Dockerfile`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Use your dockerized application:
 
 ### 1. Create `.env` file
 copy `.env.sample` to `.env`
@@ -219,8 +495,11 @@ Now you can start debugging your PHP script with...
 
 
 #### Xdebug remote connection to server:
-To debug an application from a remote server in your local IDE do the following (on the example of project `bti-brandschutz-dev` available at https://dev.bti-brandschutz.de):
-> **Warning**: this is currently untested for server xdebug versions `>= 3.X`. You may need to adjust some more xdebug variables. In this case, this may help: https://xdebug.org/docs/upgrade_guide 
+> **Warning**: this is currently untested for server xdebug versions `>= 3.X`. 
+> You may need to adjust some more xdebug variables. 
+> In this case, this may help: https://xdebug.org/docs/upgrade_guide
+
+To debug an application from a remote server in your local IDE do the following:
 1. Make sure your docker container are running
 2. Enable xdebug extension on the server. Here with example from Hetzner:
    
@@ -290,261 +569,6 @@ To disable catching these emails and sending them normally, just comment out or 
 You can look at the catched emails at `http://<DOMAIN>:<CATCH_MAIL_PORT>`. The default `CATCH_MAIL_PORT` is `8025`.
 
 
-
-# Dockerize the application:
-
-
-### Note 1:
-If you make any changes to one of the following files:
-- any `Dockerfile`
-
-make sure to rebuild it:
-```shell
-docker-compose build
-```
-After that you can start it again with:
-```shell
-docker-compose up
-```
-
-## Configuration:
-
-### 1. PHP setup
-To specify the **PHP version** change the `FROM` command in `./_docker/web/Dockerfile`
-
-e.g. for PHP version 5.6:
-```dockerfile
-ARG PHP_VERSION=5.6
-FROM php:${PHP_VERSION}-apache
-```
-After that make sure to build this container again (see Note 1 above)
-
-#### PHP Extensions:
-To install and enable **PHP extensions** add them to `./_docker/web/Dockerfile`.
-```dockerfile
-RUN install-php-extensions <extensionname>
-```
-If this did not work try this:
-```dockerfile
-RUN docker-php-ext-install <extensionname>
-```
-All available extensions see here: https://github.com/mlocati/docker-php-extension-installer#supported-php-extensions
-
-More information on https://hub.docker.com/_/php/ at *How to install more PHP extensions*
-
-#### Config:
-To edit any `php.ini` config, just add another `.ini` file to `_docker/web/additional-inis/`
-
-
-### 2. Webserver Setup
-If you need to set the root directory of your web application other than `./` 
-(for example `/webroot`) set it in `_docker/web/sites-available/000-default.conf`:
-```apacheconf
-# ...
-DocumentRoot /var/www/html/webroot
-```
-
-### 3. Database configuration
-If you need to configure some database parameters (for example `innodb_file_format`), you can do that in the `_docker/db/my.cnf` file.
-
-
-### 4. Custom application configuration files
-If you have a git ignored file (for example a `database_config.php`) in your application that normally needs to be edited,
-you can define a template file, that reduces further configuration of the Docker user.
-
-At container startup all environment variable occurrences within this file will be set to the corresponding value and
-copied to the defined location.
-
-To do this, first set a file mapping in your `docker-compose.yml` as an environment variable with the prefix `TEMPLATE_`:
-```yaml
-services:
-  web:
-    environment:
-      TEMPLATE_DB_CONFIG: "database_config.php:./path/to/application/database_config.php"
-```
-In `_docker/web/templates/` define your configuration template file like this (in this case `database_config.php`):
-```php
-<?php
-return [
-    "database" => [
-        "host" => '${DOMAIN}',
-        "user" => '${DATABASE_USER_MAIN}',
-        "password" => '${DATABASE_PASS_MAIN}',
-        "database_name" => '${DATABASE_NAME_MAIN}'
-    ],
-    'wkhtmltopdfBinary' => '${WKHTMLTOPDF_BINARY}'
-];
-```
-This also supports the bash default syntax with `:-` between variable name and default value:
-```bash
-${DOMAIN:-test.local}
-```
-If the environment variable `DOMAIN` is not set, this will default to `test.local`
-
-The variables `DATABASE_USER_MAIN` and `DATABASE_PASS_MAIN` should be set in the `_docker/public.env`.
-If you have more databases set these variables with a different suffix than `_MAIN`:
-```dotenv
-DATABASE_USER_MAIN="some_user"
-DATABASE_PASS_MAIN="s3cr3tP4ssw0rd"
-DATABASE_USER_SOMEOTHERSUFFIX="another_user"
-DATABASE_PASS_SOMEOTHERSUFFIX="sauce"
-```
-
-In this case the literal environment variables in the file `_docker/web/templates/database_config.php` will be replaced 
-with the corresponding environment value and then the file will be copied to `./path/to/application/database_config.php`.
-
-The resulting file `./path/to/application/database_config.php` can be for example:
-```php
-<?php
-return [
-    "database" => [
-        "host" => 'test.local',
-        "user" => 'some_user',
-        "password" => 's3cr3tP4ssw0rd',
-        "database_name" => 'some_db_name' 
-    ],
-    "wkhtmltopdfBinary" => '/usr/bin/wkhtmltopdf'
-];
-```
-
-### 5. Install Composer
-Composer is installed in its latest version if you define it as a build argument in the `docker-compose.yml`:
-```yaml
-services:
-  web:
-    build:
-      args:
-        INSTALL_COMPOSER: "true"
-```
-
-It runs `composer install` at startup if you set the path where it is executed with the following environment variable in your `docker-compose.yml`:
-```yaml
-services:
-  web:
-    # ...
-    environment:
-      COMPOSER_INSTALL_PATHS: ./
-```
-If you need to execute `composer install` in multiple paths you can do this by separating them by a `:`:
-```yaml
-COMPOSER_INSTALL_PATHS: ./path:./another/path
-```
-
-If you need another composer version installed (for example `1.x`) you can change this in the `Dockerfile` under `_docker/web/`:
-```dockerfile
-# install composer
-RUN install-php-extensions @composer-1 && apt-get update && apt-get install -y unzip git
-```
-More info on this on https://github.com/mlocati/docker-php-extension-installer#installing-composer
-
-### 6. Run `npm install` at startup
-Node.js and `npm` is installed if you define it as a build argument in the `docker-compose.yml`:
-```yaml
-services:
-  web:
-    build:
-      args:
-        INSTALL_NPM: "true"
-```
-The same goes for the installation of `grunt` with the build argument `INSTALL_GRUNT`.
-
-If installed it automatically runs `npm install` in the directory you specified with:  
-```yaml
-services:
-  web:
-    # ...
-    environment:
-      NPM_INSTALL_PATHS: ./path/to/sub/dir
-```
-If you need to execute `npm install` in multiple paths you can do this by separating them by a `:`:
-```yaml
-NPM_INSTALL_PATHS: ./path:./another/path
-```
-
-### 7. Access other applications from the container
-If you need to access other applications from the outside that run inside the container, you need make the port available on the outside.
-
-For example, if you run a Vue.js application with `npm run serve` and this application runs *inside* the container on `http://localhost:8080`,
-you can make this available on the outside under `http://<DOMAIN>:8080` if you add this to your `docker-compose.yml`:
-```yaml
-services:
-  web:
-    ports:
-      - "${LOOPBACK_IP:-127.255.255.254}:8080:8080"
-```
-
-### 8. Install wkhtmltopdf
-If you want to install [wkhtmltopdf](https://wkhtmltopdf.org) as a depencency change the `docker-compose.yml` to:
-```yaml
-services:
-  web:
-    build:
-      args:
-        INSTALL_WKHTMLTOPDF: "true"
-```
-After that you have to rebuild the container (see Note 1)
-
-The binary path is stored in the environment variable `WKHTMLTOPDF_BINARY` available in the `web` container
-
-### 9. Locales
-If you have to install one or more locales in the `web` container, so for example the following PHP function will work... :
-```php
-setlocale(LC_ALL, 'de_DE.UTF-8');
-``` 
-... you can add it to the `web` service as a build argument in the `docker-compose.yml`:
-```yaml
-services:
-   web:
-      build:
-         args:
-            INSTALL_LOCALES: "de_DE, fr_FR"
-```
-`INSTALL_LOCALES` takes a string separated with `,` for multiple locales as input.
-
-### 10. Git submodules
-If your application has any git submodules (sub repositories) you can automatically update/pull them at startup with changing your `docker-compose.yml` to:
-```yaml
-services:
-   web:
-      environment:
-         CONTAINS_GIT_SUBMODULES: "true"
-```
-This will execute `git submodule update --init --recursive`.
-
-This is also executed automatically if you have a `.gitmodules` file in your root directory. 
-
-To disable, set `CONTAINS_GIT_SUBMODULES` to `"false"`
-
-### 11. Automatically clone remote into sub directory
-If you want to automatically add extra needed files, that you normally would copy manually from the live server
-and that are available in a public git repository, you can specify the environment variable `CLONE_INTO_<SUFFIX>`
-in the `docker-compose.yml`:
-```yaml
-services:
-  web:
-    environment:
-       CLONE_INTO_SAMPLE: "./sub-directory:github.com/sample/sample.git"  # Warning: git repo link needs to be without 'http://'
-```
-When starting the container this will clone the public repository `github.com/sample/sample.git` in the background 
-and copy it's content to `./sub-directory` **without** the hidden `.git` folder.
-
-### 12. Match your server setup
-With Docker you want to match the environment of the server where the application will run later as close as possible.
-This helps prevent weird errors and bugs that only occur on the live system or only on your development system.
-
-Here are some additional tips to prevent these discrepancies in the first place:
-1. Put as many files as possible into git where it makes sense. This way other developers do not have to copy single files from the live system
-   1. put `composer.lock` into git, so other developers have the exact same versions when they install dependencies with `composer install`.
-   2. put `.htaccess` to git if possible, so for example redirects are treated the same as on the live system.
-   3. use the template files as explained above to automatically configure database configuration files that should not be in git.
-2. Replicate the `php.ini` configuration from the server as close as possible. You can configure your own `.ini` file in `_docker/web/additional-inis`.
-3. Install the same PHP version as used on the live system with the `FROM` command in the `_docker/web/Dockerfile`
-4. Install the same Composer version as used on the live system. 
-   This can prevent dependency installation problems. 
-   More information on how to install a specific composer version in the `_docker/web/Dockerfile` on here https://github.com/mlocati/docker-php-extension-installer#installing-composer
-5. Install all PHP extensions that are required by the application. This is also done in the `_docker/web/Dockerfile`
-
-
 ## Troubleshoot
 #### bash into container:
 To go into a container simply run the `shell` script with it's two optional parameters.
@@ -571,64 +595,5 @@ shell.cmd db /bin/sh      # goes into db container on /bin/sh
 ```
 
 
-# Roadmap
-* [x] initial composer install execution within docker container
-* [x] use of docker alpine packages to create smaller container
-* [x] set webroot of web application
-* [x] move wkhtmltopdf and composer to another dependency, and not .env bc it is git dependent
-* [x] Split Documentation in "Dockerize your application", "Run your application in Docker"
-* [x] support for multiple sql files imported into seperate databases
-* [x] add my.cnf for easier configuration
-* [x] performance improvements (switch to hyper-v)
-* [x] echo of localhost:<port> after starting container
-* [x] further installation logic (composer install, npm install, etc...)
-* [x] some method to run several projects at the same time without port collision and easy access to web and database
-* [x] automatic adding of host resolution to hosts file with startup script
-* [x] make npm and composer available in main container
-* [x] fix startup.sh output when DOMAIN is undefined
-* [x] support for multiple npm/composer install directories
-* [x] easier mariadb connection setup
-* [x] access from another device in the network
-* [x] setup for https connections (sgv project?)
-* [x] fix database connection
-* [x] fix hosts file script
-* [x] add output `started at http://192.15.34.5 + https?` to `startup.sh`
-* [x] get rid of apache2-foreground ssl:warnings
-* [x] automate config files more - "template"-language, that dynamically replaces ${VARIABLES} of config files and maps them with volumes
-* [x] install grunt into container
-* [x] error when database name has - in name
-* [x] 3307 as default port
-* [x] replace-templates.sh: support for default values (syntax: `${WEB_PORT:-80}`)
-* [x] bti-brandschutz: Fehler beim Anmelden: funktioniert nicht für bti-brandschutz.docker domain (Problem nur im Chrome: gefixt mit Cookies UND Websitedaten löschen: chrome://settings/siteData?searchSubpage=.docker)
-* [x] test WKHTMLTOPDF in application
-* [x] automate LOOPBACK_IP?
-* [x] xdebug path mapping documentation
-* [x] support xdebug with remote server (ssh tunnel etc.)
-* [x] reroute emails to mailhog installation
-* [x] INSTALL_NPM flag + INSTALL_GRUNT flag for Dockerfile
-* [x] script for automatic web container entrance? -> docker-compose exec web bash
-* [x] container entrance script independent of platform?
-* [x] support for php script xdebugging (e.g. via cake command class or classic script) -> PHPStorm: Languages & Frameworks - PHP -> CLI Interpreters; PHPStorm: Build, Execution, Deployment - Docker - add new Docker connection with path mapping
-* [x] progress output for initial .sql file import (working inside container; not working with `docker-compose up`)
-* [x] php xdebug script with docker
-* [x] rename image + containers: <name>-web, <name>-db
-* [x] xdebug PHP script testing with xdebug < 3.X
-* [x] hint in documentation that `docker-compose down` will delete database in container (all changes gone)
-* [x] Dockerization Tips: put files to git, where it makes sense; add php.ini as configured on live server, correct PHP version as on server, composer.lock used on server, to install exactly those versions, correct composer version, install all required php extensions
-* [x] automate `git submodule update --init --recursive`
-* [x] MERGE_DIR script for IFAA magento 1
-* [x] npm and composer install in it's own script, not in startup.sh
-* [x] install-locales and install-xdebug in Dockerfile (https://github.com/mlocati/docker-php-extension-installer#installing-specific-versions-of-an-extension) -> better caching
-* [x] make npm run serve output available outside of container (bti-brandschutz) -> npm port is not always the same
-* [x] clone-into.sh documentation
-* [x] create valid certificate instead of self signed -> mkcert script? -> for testing of service worker (bti-brandschutz)
-* [x] firefox windows documentation for valid certificates
-* [x] switch to default tld `.local` instead of `.docker`
-* [x] when starting multiple docker container, there is a problem with port allocation with EXTERNAL_IP
-* [ ] test xdebug AND install-cert.cmd on linux (Marius or Timo) and on macOS (Johannes? Jana? Anna-Lisa?)
-* [ ] test valid certificate with wsl2 docker backend (https://ddev.readthedocs.io/en/latest/#installation-or-upgrade-windows-wsl2  step 5)
-* [ ] dockerize IFAA (Genesis World, ERP, Shop) (-> clone-into.sh: support for ftp and git with authentication)
-* [ ] updaten: gkm-auftragsverwaltung, bti-brandschutz
-
-# IMPORTANT:
-* [ ] try https://github.com/drud/ddev with ifaa on linux (might replace this repo)
+# Roadmap?
+* [ ] testing docker-lampose on linux and MacOS
